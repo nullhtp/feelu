@@ -43,7 +43,7 @@ Install these essential extensions for Flutter development:
 
 1. **Clone and open the project:**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/nullhtp/feelu
    cd feelu
    code .
    ```

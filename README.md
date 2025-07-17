@@ -1,6 +1,6 @@
 # Feelu - Flutter Project
 
-A Flutter application for emotional tracking and wellness.
+A Flutter application designed to facilitate communication between blind and deaf people with the outside world.
 
 ## VS Code Setup Instructions
 
@@ -233,3 +233,5 @@ flutter channel stable && flutter upgrade
 - [Dart Language Tour](https://dart.dev/guides/language/language-tour)
 - [Flutter Widget Catalog](https://docs.flutter.dev/development/ui/widgets)
 - [VS Code Flutter Extension Guide](https://docs.flutter.dev/development/tools/vs-code)
+- [Android Accessibility](https://developer.android.com/guide/topics/ui/accessibility)
+- [iOS Accessibility](https://developer.apple.com/accessibility/)

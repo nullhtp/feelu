@@ -1,0 +1,15 @@
+{
+    "recommendations": [
+        "dart-code.flutter",
+        "dart-code.dart-code",
+        "usernamehw.errorlens",
+        "ms-vscode.vscode-json",
+        "streetsidesoftware.code-spell-checker",
+        "gruntfuggly.todo-tree",
+        "formulahendry.auto-rename-tag",
+        "christian-kohler.path-intellisense",
+    ],
+    "unwantedRecommendations": [
+        "ms-vscode.vscode-typescript"
+    ]
+}

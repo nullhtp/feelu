@@ -1,9 +1,16 @@
-import 'package:feelu/ui/home_screen.dart';
+import 'package:feelu/feature/braille_input/braille_input_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Set app-wide landscape orientation
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
 
   // Enable wake lock to keep the app always on
   await WakelockPlus.enable();
@@ -23,7 +30,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
-      home: const HomeScreen(),
+      home: const BrailleInputScreen(),
     );
   }
 }

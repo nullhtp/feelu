@@ -1,6 +1,6 @@
 import 'package:vibration/vibration.dart';
 
-class VibrationService {
+class VibrationNotificationService {
   /// Check if vibration is available on device
   static Future<bool> isAvailable() async {
     return await Vibration.hasVibrator();
@@ -17,7 +17,7 @@ class VibrationService {
     if (hasCustomVibrator) {
       // Custom vibration pattern: short burst with low intensity
       await Vibration.vibrate(
-        pattern: [100, 100, 100, 100],
+        pattern: [100, 100, 200, 200],
         duration: 100, // 100ms duration
         amplitude: 50, // Low amplitude (0-255 scale)
       );
@@ -25,6 +25,21 @@ class VibrationService {
       // Fallback to basic vibration
       await Vibration.vibrate(duration: 100);
     }
+  }
+
+  static Future<void> vibrateNotification() async {
+    final hasVibrator = await isAvailable();
+    if (!hasVibrator) return;
+    await Vibration.vibrate(duration: 100);
+  }
+
+  static Future<void> vibrateError() async {
+    final hasVibrator = await isAvailable();
+    if (!hasVibrator) return;
+    await Vibration.vibrate(
+      pattern: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
+      amplitude: 100,
+    );
   }
 
   /// Stop any ongoing vibration

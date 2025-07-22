@@ -1,4 +1,4 @@
-import 'package:feelu/feature/braille_input/vibration_service.dart';
+import 'package:feelu/core/vibration_notification_service.dart';
 
 class BrailleService {
   // Braille code mapping (6-dot system simplified to 3-dot for this implementation)
@@ -76,7 +76,7 @@ class BrailleService {
       outputText.add(character);
     } else {
       // If pattern not found, add a placeholder
-      VibrationService.vibrateWarning();
+      VibrationNotificationService.vibrateWarning();
     }
 
     // Reset for next input

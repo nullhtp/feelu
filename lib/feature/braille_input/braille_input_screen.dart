@@ -1,5 +1,5 @@
-import 'package:feelu/core/tts_service.dart';
 import 'package:feelu/core/vibration_notification_service.dart';
+import 'package:feelu/outputs/tts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

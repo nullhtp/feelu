@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'interfaces.dart';
+
+import '../core/interfaces.dart';
 
 /// Text-to-Speech service for offline speech synthesis
 class TtsService implements Outputable {
@@ -168,8 +169,8 @@ class TtsService implements Outputable {
 
   /// Implementation of Outputable interface - processes text for speech output
   @override
-  void process(String data) {
-    speak(data);
+  Future<void> process(String data) async {
+    await speak(data);
   }
 
   /// Speak the given text

@@ -16,7 +16,6 @@ class GemmaService {
   GemmaService._();
 
   InferenceModel? _inferenceModel;
-  InferenceChat? _chat;
   late final ModelDownloader _downloaderDataSource;
 
   bool _isModelLoading = false;
@@ -46,7 +45,7 @@ class GemmaService {
   double? get downloadProgress => _downloadProgress;
   String? get errorMessage => _errorMessage;
   bool get canRetry => _canRetry;
-  bool get isInitialized => _inferenceModel != null && _chat != null;
+  bool get isInitialized => _inferenceModel != null;
 
   /// Initialize the Gemma service
   Future<void> initialize() async {
@@ -99,8 +98,6 @@ class GemmaService {
         maxTokens: 2048,
       );
 
-      _chat = await _inferenceModel!.createChat(supportImage: true);
-
       _updateState(isModelLoading: false, errorMessage: null);
     } catch (e) {
       debugPrint("Error initializing model: $e");
@@ -144,27 +141,14 @@ class GemmaService {
   }
 
   /// Send a message and get a response stream
-  Stream<String> sendMessage(String text) async* {
-    if (!isInitialized) {
-      throw Exception('Model not initialized');
-    }
-
-    if (text.isEmpty) {
-      return;
-    }
-
-    try {
-      // Create and send the user's message
-      final userMessage = Message.text(text: text, isUser: true);
-      await _chat!.addQueryChunk(userMessage);
-
-      // Generate and stream the response
-      final responseStream = _chat!.generateChatResponseAsync();
-      yield* responseStream;
-    } catch (e) {
-      debugPrint("Error during chat generation: $e");
-      throw Exception('Error generating response: $e');
-    }
+  Future<InferenceChat> createChat({
+    bool supportImage = true,
+    double temperature = 0,
+  }) async {
+    return await _inferenceModel!.createChat(
+      supportImage: supportImage,
+      temperature: temperature,
+    );
   }
 
   /// Clear corrupted model

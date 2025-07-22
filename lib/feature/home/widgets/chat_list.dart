@@ -1,4 +1,4 @@
-import 'package:feelu/ui/widgets/chat_message_widget.dart';
+import 'package:feelu/feature/home/widgets/chat_message_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
 

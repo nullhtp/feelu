@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:feelu/core/gemma_service.dart';
-import 'package:feelu/ui/widgets/widgets.dart';
+import 'package:feelu/feature/home/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
 
@@ -103,6 +103,15 @@ class _HomeScreenState extends State<HomeScreen> {
         foregroundColor: Colors.black,
         elevation: 1,
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.accessibility_new),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            tooltip: 'Back to Braille Input',
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(

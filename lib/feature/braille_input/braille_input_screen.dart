@@ -29,15 +29,16 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
     HapticFeedback.lightImpact();
   }
 
-  void _onInputStateChanged() {
-    setState(() {
-      // Just trigger a rebuild to update the input state display
-    });
-  }
-
   void _backspace() {
     setState(() {
       _brailleService.backspace();
+      _displayText = _brailleService.getDisplayText();
+    });
+  }
+
+  void _clearAllText() {
+    setState(() {
+      _brailleService.clearOutput();
       _displayText = _brailleService.getDisplayText();
     });
   }
@@ -57,6 +58,11 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
                   // Delete functionality - tap anywhere in text area to delete
                   HapticFeedback.heavyImpact();
                   _backspace();
+                },
+                onLongPress: () {
+                  // Clear all text - long press anywhere in text area
+                  HapticFeedback.heavyImpact();
+                  _clearAllText();
                 },
                 child: Container(
                   margin: const EdgeInsets.all(8),
@@ -81,7 +87,7 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
                             ),
                           ),
                           Text(
-                            'Tap to delete',
+                            'Tap to delete | Long press to clear all',
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.white54,

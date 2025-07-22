@@ -53,7 +53,28 @@ Install these essential extensions for Flutter development:
    flutter pub get
    ```
 
-3. **Verify Flutter setup:**
+3. **Configure Hugging Face Access Token (Required):**
+   
+   This app requires a Hugging Face access token to download AI models.
+
+   **Manual Setup Options:**
+
+   **Method 1: Environment Variable (Recommended)**
+   ```bash
+   # Add to your shell profile (.bashrc, .zshrc, etc.)
+   export HF_ACCESS_TOKEN="your_hugging_face_token_here"
+   ```
+
+   **Method 2: Local Config File**
+   ```bash
+   # Copy the example config and edit it
+   cp config.example.json config.json
+   # Edit config.json with your actual token
+   ```
+
+   **Get your token from:** https://huggingface.co/settings/tokens
+
+4. **Verify Flutter setup:**
    ```bash
    flutter doctor
    ```
@@ -214,6 +235,11 @@ flutter upgrade
    - Try hot restart instead
    - Restart the app completely
 
+5. **Model download fails with authentication error**
+   - Verify your Hugging Face access token is correct
+   - Check token has appropriate permissions
+   - Ensure environment variable or config.json is properly set
+
 #### Helpful Commands
 
 ```bash
@@ -226,6 +252,13 @@ flutter clean && flutter pub get
 # Reset to stable channel
 flutter channel stable && flutter upgrade
 ```
+
+### Security Notes
+
+- **Never commit sensitive tokens to git**: The `config.json` file is gitignored to prevent accidental commits
+- **Use environment variables in production**: Environment variables are more secure than config files
+- **Rotate tokens regularly**: Update your Hugging Face access token periodically
+- **Minimum permissions**: Use tokens with only the necessary permissions for model downloads
 
 ### Additional Resources
 

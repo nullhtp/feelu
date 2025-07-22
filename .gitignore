@@ -43,3 +43,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Configuration files with sensitive data
+config.json
+.env
+
+# Scripts directory should be committed but keep it organized
+# (no additional ignore rules needed for scripts/)

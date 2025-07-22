@@ -1,7 +1,13 @@
 import 'package:feelu/ui/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Enable wake lock to keep the app always on
+  await WakelockPlus.enable();
+
   runApp(const MyApp());
 }
 

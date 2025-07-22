@@ -56,7 +56,7 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
               child: GestureDetector(
                 onTap: () {
                   // Delete functionality - tap anywhere in text area to delete
-                  HapticFeedback.heavyImpact();
+                  HapticFeedback.mediumImpact();
                   _backspace();
                 },
                 onLongPress: () {

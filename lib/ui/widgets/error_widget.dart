@@ -1,18 +1,17 @@
-import 'package:feelu/core/model_downloader.dart';
 import 'package:flutter/material.dart';
 
 class ErrorDisplayWidget extends StatelessWidget {
   final String errorMessage;
   final bool canRetry;
   final VoidCallback onRetry;
-  final ModelDownloader downloaderDataSource;
+  final VoidCallback onClearModel;
 
   const ErrorDisplayWidget({
     super.key,
     required this.errorMessage,
     required this.canRetry,
     required this.onRetry,
-    required this.downloaderDataSource,
+    required this.onClearModel,
   });
 
   @override
@@ -56,21 +55,7 @@ class ErrorDisplayWidget extends StatelessWidget {
               ),
             const SizedBox(height: 16),
             TextButton(
-              onPressed: () async {
-                try {
-                  await downloaderDataSource.clearCorruptedModel();
-                  onRetry();
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Error clearing model: $e'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                }
-              },
+              onPressed: onClearModel,
               child: const Text('Clear & Re-download Model'),
             ),
           ],

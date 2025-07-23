@@ -59,16 +59,9 @@ Install these essential extensions for Flutter development:
 
    **Manual Setup Options:**
 
-   **Method 1: Environment Variable (Recommended)**
-   ```bash
-   # Add to your shell profile (.bashrc, .zshrc, etc.)
-   export HF_ACCESS_TOKEN="your_hugging_face_token_here"
-   ```
-
-   **Method 2: Local Config File**
    ```bash
    # Copy the example config and edit it
-   cp config.example.json config.json
+   cp assets/config.example.json assets/config.json
    # Edit config.json with your actual token
    ```
 
@@ -120,15 +113,6 @@ flutter run --release
 1. Set breakpoints by clicking in the gutter next to line numbers
 2. Use Debug Console to inspect variables
 3. Use Debug Sidebar to view call stack and variables
-
-#### Useful VS Code Shortcuts
-
-- `Cmd+Shift+P` / `Ctrl+Shift+P`: Command Palette
-- `Cmd+.` / `Ctrl+.`: Quick Fix (show code actions)
-- `F12`: Go to Definition
-- `Shift+F12`: Find All References
-- `Cmd+Shift+O` / `Ctrl+Shift+O`: Go to Symbol in File
-- `Cmd+T` / `Ctrl+T`: Go to Symbol in Workspace
 
 ### Testing
 

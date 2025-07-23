@@ -398,11 +398,6 @@ class _InitializationScreenState extends State<InitializationScreen> {
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
             ),
           ),
-          const SizedBox(height: 12),
-          Text(
-            '${(service.progress! * 100).toStringAsFixed(1)}%',
-            style: TextStyle(color: Colors.grey[400], fontSize: 14),
-          ),
         ],
       ],
     );

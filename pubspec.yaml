@@ -67,9 +67,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - assets/images/
-  #   - assets/fonts/
+  assets:
+    - assets/
   # Note: Large model files should NOT be included as Flutter assets
   # They should be downloaded at runtime or loaded from external storage
 

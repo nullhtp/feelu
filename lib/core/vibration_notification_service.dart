@@ -42,6 +42,18 @@ class VibrationNotificationService {
     );
   }
 
+  /// Custom vibration with amplitude and duration
+  static Future<void> vibrateCustom(int amplitude, int duration) async {
+    final hasVibrator = await isAvailable();
+    if (!hasVibrator) return;
+    final hasCustomVibrator = await Vibration.hasCustomVibrationsSupport();
+    if (hasCustomVibrator) {
+      await Vibration.vibrate(duration: duration, amplitude: amplitude);
+    } else {
+      await Vibration.vibrate(duration: duration);
+    }
+  }
+
   /// Stop any ongoing vibration
   static Future<void> cancel() async {
     await Vibration.cancel();

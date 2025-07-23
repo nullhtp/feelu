@@ -198,7 +198,9 @@ class _HomeScreenState extends State<HomeScreen> {
       });
 
       // 4. Listen to the response stream and aggregate the tokens.
-      final responseStream = _gemmaService.sendMessage(text);
+      final chat = await _gemmaService.createChat();
+      chat.addQueryChunk(responsePlaceholder);
+      final responseStream = chat.generateChatResponseAsync();
 
       await for (final token in responseStream) {
         if (!mounted) return;

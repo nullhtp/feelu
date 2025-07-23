@@ -1,4 +1,4 @@
-import 'package:feelu/feature/braille_input/braille_input_screen.dart';
+import 'package:feelu/feature/initialization/initialization_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
-      home: const BrailleInputScreen(),
+      home: const InitializationScreen(),
     );
   }
 }

@@ -5,9 +5,9 @@ enum Model {
   gemma3nNetwork(
     // Model will be downloaded from network on first use
     url:
-        'https://huggingface.co/google/gemma-3n-E4B-it-litert-preview/resolve/main/gemma-3n-E4B-it-int4.task',
-    filename: 'gemma-3n-E4B-it-int4.task',
-    displayName: 'Gemma 3 Nano E4B IT Multimodal (Network Download)',
+        'https://huggingface.co/google/gemma-3n-E2B-it-litert-preview/resolve/main/gemma-3n-E2B-it-int4.task',
+    filename: 'gemma-3n-E2B-it-int4.task',
+    displayName: 'Gemma 3 Nano E2B IT Multimodal (Network Download)',
     licenseUrl: 'https://ai.google.dev/gemma/terms',
     needsAuth: false,
     localModel: true,

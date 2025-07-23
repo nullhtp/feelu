@@ -1,15 +1,17 @@
 abstract interface class Outputable {
   Future<void> initialize();
   Future<void> process(String data);
+  Future<void> dispose();
 }
 
 abstract interface class Transformable {
   Future<void> initialize();
   Future<String> transform(String data);
+  Future<void> dispose();
 }
 
 class Pipeline {
-  Pipeline(this.transformable, this.outputable);
+  Pipeline({required this.transformable, required this.outputable});
 
   final Transformable transformable;
   final Outputable outputable;
@@ -22,5 +24,10 @@ class Pipeline {
   Future<void> process(String data) async {
     final transformedData = await transformable.transform(data);
     await outputable.process(transformedData);
+  }
+
+  Future<void> dispose() async {
+    await transformable.dispose();
+    await outputable.dispose();
   }
 }

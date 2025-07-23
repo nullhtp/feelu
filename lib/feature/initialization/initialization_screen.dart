@@ -163,7 +163,7 @@ class _InitializationScreenState extends State<InitializationScreen> {
 
   Future<void> _initializeTtsService(ServiceInitializationState service) async {
     try {
-      final ttsService = TtsService();
+      final ttsService = TtsService.instance;
       final success = await ttsService.initialize();
 
       if (mounted) {

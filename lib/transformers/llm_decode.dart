@@ -1,4 +1,3 @@
-import 'package:flutter_gemma/core/chat.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
 
 import '../core/gemma_service.dart';
@@ -11,15 +10,11 @@ class LlmDecodeService implements Transformable {
 
   LlmDecodeService._();
 
-  InferenceChat? _chat;
   @override
-  Future<void> initialize() async {
-    GemmaService.instance.initialize();
-    _chat = await GemmaService.instance.createChat(
-      supportImage: true,
-      temperature: 0,
-    );
-  }
+  Future<void> dispose() async {}
+
+  @override
+  Future<void> initialize() async {}
 
   @override
   Future<String> transform(String data) async {
@@ -27,29 +22,28 @@ class LlmDecodeService implements Transformable {
   }
 
   Future<String> sendMessage(String text) async {
-    if (_chat == null) {
-      throw Exception('Model not initialized');
-    }
-
     if (text.isEmpty) {
       return '';
     }
+    final session = await GemmaService.instance.createSession();
 
     try {
       // Create and send the user's message
 
       text =
-          'Decode the following text you should only return the decoded text without any other text or explanation: $text';
+          'Decode the following text you should only return the decoded text without any other text or explanation: $text ';
 
       final userMessage = Message.text(text: text, isUser: true);
-      await _chat!.addQueryChunk(userMessage);
+      await session.addQueryChunk(userMessage);
 
       // Generate and stream the response
-      final response = await _chat!.generateChatResponse();
+      final response = await session.getResponse();
       print(response);
       return response;
     } catch (e) {
       throw Exception('Error generating response: $e');
+    } finally {
+      await session.close();
     }
   }
 }

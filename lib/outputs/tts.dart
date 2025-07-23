@@ -7,9 +7,9 @@ import '../core/interfaces.dart';
 
 /// Text-to-Speech service for offline speech synthesis
 class TtsService implements Outputable {
-  static final TtsService _instance = TtsService._internal();
-  factory TtsService() => _instance;
-  TtsService._internal();
+  static TtsService? _instance;
+  static TtsService get instance => _instance ??= TtsService._();
+  TtsService._();
 
   final FlutterTts _flutterTts = FlutterTts();
   bool _isInitialized = false;
@@ -352,7 +352,8 @@ class TtsService implements Outputable {
   }
 
   /// Dispose of the service
-  void dispose() {
+  @override
+  Future<void> dispose() async {
     stop();
     _isInitialized = false;
   }

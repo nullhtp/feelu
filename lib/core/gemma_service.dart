@@ -148,6 +148,16 @@ class GemmaService {
     return await _inferenceModel!.createChat(
       supportImage: supportImage,
       temperature: temperature,
+      randomSeed: 1,
+      topK: 1,
+    );
+  }
+
+  Future<InferenceModelSession> createSession() async {
+    return await _inferenceModel!.createSession(
+      temperature: 0,
+      randomSeed: 1,
+      topK: 1,
     );
   }
 

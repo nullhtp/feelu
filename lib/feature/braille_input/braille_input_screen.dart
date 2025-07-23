@@ -1,5 +1,7 @@
+import 'package:feelu/core/interfaces.dart';
 import 'package:feelu/core/vibration_notification_service.dart';
 import 'package:feelu/outputs/tts.dart';
+import 'package:feelu/transformers/llm_decode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -15,23 +17,19 @@ class BrailleInputScreen extends StatefulWidget {
 
 class _BrailleInputScreenState extends State<BrailleInputScreen> {
   late BrailleService _brailleService;
-  late TtsService _ttsService;
   String _displayText = '';
-  bool _isTtsInitialized = false;
+  bool _isSpeaking = false; // Add flag to prevent multiple speak calls
+
+  final Pipeline _outputPipeline = Pipeline(
+    transformable: LlmDecodeService.instance,
+    outputable: TtsService.instance,
+  );
 
   @override
   void initState() {
     super.initState();
     _brailleService = BrailleService();
-    _ttsService = TtsService();
-    _initializeTts();
-  }
-
-  Future<void> _initializeTts() async {
-    final success = await _ttsService.initialize();
-    setState(() {
-      _isTtsInitialized = success;
-    });
+    _outputPipeline.initialize();
   }
 
   void _onTextGenerated(String text) {
@@ -57,11 +55,6 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
   }
 
   Future<void> _speakText() async {
-    if (!_isTtsInitialized) {
-      HapticFeedback.heavyImpact();
-      return;
-    }
-
     final textToSpeak = _displayText.trim();
     if (textToSpeak.isEmpty) {
       // Speak a message indicating no text
@@ -69,14 +62,14 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
     } else {
       // Speak the inputted text
       VibrationNotificationService.vibrateNotification();
-      await _ttsService.speak(textToSpeak);
+      await _outputPipeline.process(textToSpeak);
       VibrationNotificationService.vibrateNotification();
     }
   }
 
   @override
   void dispose() {
-    _ttsService.dispose();
+    _outputPipeline.dispose();
     super.dispose();
   }
 
@@ -87,10 +80,17 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
       body: SafeArea(
         child: GestureDetector(
           // Add swipe down detection for the entire screen
-          onPanUpdate: (details) {
-            // Check if swipe is moving downward
-            if (details.delta.dy > 5) {
-              _speakText();
+          onPanUpdate: (details) async {
+            // Check if swipe is moving downward and not already speaking
+            if (details.delta.dy > 5 && !_isSpeaking) {
+              try {
+                _isSpeaking = true;
+                await _speakText();
+              } catch (e) {
+                print(e);
+              } finally {
+                _isSpeaking = false;
+              }
             }
           },
           child: Column(
@@ -146,9 +146,7 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
                                   'Swipe down to speak text',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: _isTtsInitialized
-                                        ? Colors.green.shade300
-                                        : Colors.red.shade300,
+                                    color: Colors.green.shade300,
                                     fontStyle: FontStyle.italic,
                                     fontWeight: FontWeight.bold,
                                   ),

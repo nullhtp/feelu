@@ -1,6 +1,8 @@
 import 'package:feelu/core/interfaces.dart';
 import 'package:feelu/core/vibration_notification_service.dart';
+import 'package:feelu/outputs/braille_output.dart';
 import 'package:feelu/outputs/tts.dart';
+import 'package:feelu/transformers/llm_assistant.dart';
 import 'package:feelu/transformers/llm_decode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,11 +27,17 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
     outputable: TtsService.instance,
   );
 
+  final Pipeline _assistantPipeline = Pipeline(
+    transformable: LlmAssistantService.instance,
+    outputable: BrailleOutputService.instance,
+  );
+
   @override
   void initState() {
     super.initState();
     _brailleService = BrailleService();
     _outputPipeline.initialize();
+    _assistantPipeline.initialize();
   }
 
   void _onTextGenerated(String text) {
@@ -67,6 +75,19 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
     }
   }
 
+  Future<void> _askAssistant() async {
+    final textToSpeak = _displayText.trim();
+    if (textToSpeak.isEmpty) {
+      // Speak a message indicating no text
+      VibrationNotificationService.vibrateWarning();
+    } else {
+      // Speak the inputted text
+      VibrationNotificationService.vibrateNotification();
+      await _assistantPipeline.process(textToSpeak);
+      VibrationNotificationService.vibrateNotification();
+    }
+  }
+
   @override
   void dispose() {
     _outputPipeline.dispose();
@@ -86,6 +107,16 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
               try {
                 _isSpeaking = true;
                 await _speakText();
+              } catch (e) {
+                print(e);
+              } finally {
+                _isSpeaking = false;
+              }
+            }
+            if (details.delta.dy < -5 && !_isSpeaking) {
+              try {
+                _isSpeaking = true;
+                await _askAssistant();
               } catch (e) {
                 print(e);
               } finally {
@@ -143,7 +174,7 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
                                   ),
                                 ),
                                 Text(
-                                  'Swipe down to speak text',
+                                  'Swipe down to speak text | Swipe up to ask assistant',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.green.shade300,

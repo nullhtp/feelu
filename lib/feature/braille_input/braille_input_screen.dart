@@ -39,6 +39,11 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
     _brailleService = BrailleService();
     _outputPipeline.initialize();
     _assistantPipeline.initialize();
+    // Notify user they've entered braille input mode with dot-like pattern
+    VibrationNotificationService.vibratePattern(
+      pattern: [200, 300, 200, 300, 200],
+      amplitude: 128,
+    );
   }
 
   void _onTextGenerated(String text) {

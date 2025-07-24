@@ -58,4 +58,23 @@ class VibrationNotificationService {
   static Future<void> cancel() async {
     await Vibration.cancel();
   }
+
+  /// Flexible vibration pattern function
+  static Future<void> vibratePattern({
+    required List<int> pattern,
+    int amplitude = 128,
+  }) async {
+    final hasVibrator = await isAvailable();
+    if (!hasVibrator) return;
+
+    final hasCustomVibrator = await Vibration.hasCustomVibrationsSupport();
+
+    if (hasCustomVibrator) {
+      await Vibration.vibrate(pattern: pattern, amplitude: amplitude);
+    } else {
+      // Fallback: use the first duration from pattern or default to 200ms
+      final duration = pattern.isNotEmpty ? pattern.first : 200;
+      await Vibration.vibrate(duration: duration);
+    }
+  }
 }

@@ -41,6 +41,11 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
     _initializeServices();
     _initializeAnimations();
     _subscribeToTransformedData();
+    // Notify user they've entered speech vibro mode with wave-like pattern
+    VibrationNotificationService.vibratePattern(
+      pattern: [100, 50, 100, 50, 100, 50, 100, 50, 100],
+      amplitude: 100,
+    );
   }
 
   void _subscribeToTransformedData() {
@@ -192,109 +197,110 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
           },
           child: Column(
             children: [
-              // Header
+              // Status indicator
               Container(
+                margin: const EdgeInsets.all(8),
                 padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade900,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white30, width: 2),
+                ),
+                child: Column(
                   children: [
-                    Text(
-                      'SPEECH VIBRO',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Swipe left to return',
+                          'SPEECH VIBRO',
                           style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white54,
-                            fontStyle: FontStyle.italic,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white70,
+                            letterSpacing: 1.2,
                           ),
                         ),
-                        Text(
-                          'Swipe down to repeat',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white54,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                        Text(
-                          'Swipe up to force listen',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white54,
-                            fontStyle: FontStyle.italic,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'Swipe left to return',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white54,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                            Text(
+                              'Swipe down to repeat | Swipe up to force listen',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.green.shade300,
+                                fontStyle: FontStyle.italic,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-
-              // Status indicator
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: _isListening
-                      ? Colors.red.shade900
-                      : _isProcessing
-                      ? Colors.orange.shade900
-                      : Colors.green.shade900,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white30, width: 2),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _isListening
-                          ? Icons.mic
-                          : _isProcessing
-                          ? Icons.sync
-                          : Icons.check_circle,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _isListening
-                            ? 'Listening... Speak now!'
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: _isListening
+                            ? Colors.red.shade900
                             : _isProcessing
-                            ? 'Processing with AI...'
-                            : 'Ready to listen',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                            ? Colors.orange.shade900
+                            : Colors.green.shade900,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white30, width: 1),
                       ),
-                    ),
-                    if (_isListening)
-                      AnimatedBuilder(
-                        animation: _pulseAnimation,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: _pulseAnimation.value,
-                            child: Container(
-                              width: 12,
-                              height: 12,
-                              decoration: const BoxDecoration(
+                      child: Row(
+                        children: [
+                          Icon(
+                            _isListening
+                                ? Icons.mic
+                                : _isProcessing
+                                ? Icons.sync
+                                : Icons.check_circle,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _isListening
+                                  ? 'Listening... Speak now!'
+                                  : _isProcessing
+                                  ? 'Processing with AI...'
+                                  : 'Ready to listen',
+                              style: const TextStyle(
                                 color: Colors.white,
-                                shape: BoxShape.circle,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          );
-                        },
+                          ),
+                          if (_isListening)
+                            AnimatedBuilder(
+                              animation: _pulseAnimation,
+                              builder: (context, child) {
+                                return Transform.scale(
+                                  scale: _pulseAnimation.value,
+                                  child: Container(
+                                    width: 12,
+                                    height: 12,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                        ],
                       ),
+                    ),
                   ],
                 ),
               ),
@@ -303,10 +309,10 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
               Expanded(
                 flex: 1,
                 child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  margin: const EdgeInsets.all(8),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade900,
+                    color: Colors.grey.shade900,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.white30, width: 2),
                   ),
@@ -316,21 +322,21 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
                       Text(
                         'SUMMARIZED OUTPUT',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white70,
-                          letterSpacing: 1.0,
+                          letterSpacing: 1.2,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Expanded(
                         child: Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
                             color: Colors.black,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.white, width: 1),
+                            border: Border.all(color: Colors.white, width: 2),
                           ),
                           child: SingleChildScrollView(
                             child: Text(
@@ -338,12 +344,20 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
                                   ? 'Summarized text will appear here...'
                                   : _summarizedText,
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 18,
+                                fontFamily: 'monospace',
                                 color: _summarizedText.isEmpty
                                     ? Colors.white60
                                     : Colors.white,
-                                height: 1.3,
-                                fontWeight: FontWeight.w500,
+                                height: 1.2,
+                                fontWeight: FontWeight.bold,
+                                shadows: [
+                                  Shadow(
+                                    offset: Offset(1, 1),
+                                    blurRadius: 2,
+                                    color: Colors.black54,
+                                  ),
+                                ],
                               ),
                             ),
                           ),

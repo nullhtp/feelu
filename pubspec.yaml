@@ -43,6 +43,7 @@ dependencies:
   wakelock_plus: ^1.2.8
   vibration: ^2.0.0
   flutter_tts: ^4.2.0
+  speech_to_text: ^7.2.0
 
 dev_dependencies:
   flutter_test:

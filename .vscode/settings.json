@@ -38,5 +38,9 @@
     "**/.dart_tool": true,
     "**/.git": true,
     "**/node_modules": true
-  }
+  },
+  "cSpell.words": [
+    "outputable",
+    "Vibro"
+  ]
 }

@@ -7,6 +7,7 @@ import 'package:feelu/transformers/llm_decode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../speech_vibro/speech_vibro_screen.dart';
 import 'braille_service.dart';
 import 'widgets/braille_piano_widget.dart';
 
@@ -122,6 +123,14 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
               } finally {
                 _isSpeaking = false;
               }
+            }
+            // Swipe right to navigate to speech vibro screen
+            if (details.delta.dx > 5) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => const SpeechVibroScreen(),
+                ),
+              );
             }
           },
           child: Column(

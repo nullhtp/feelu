@@ -31,7 +31,7 @@ class LlmAssistantService implements Transformable {
     try {
       // Create and send the user's message
       text =
-          'You are a helpful assistant for a blind person. You should be very short and concise. You should not explain yourself. $text';
+          'You are a helpful assistant for a blind person. You should be very short and concise. You should not explain yourself. Final answer should be no more than 10 words. $text';
 
       final userMessage = Message.text(text: text, isUser: true);
       await session.addQueryChunk(userMessage);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/gemma_service.dart';
+import '../../core/speech_recognition_service.dart'; // Added import
 import '../../core/vibration_notification_service.dart';
 import '../../outputs/tts.dart';
 import '../braille_input/braille_input_screen.dart';
@@ -54,6 +55,10 @@ class _InitializationScreenState extends State<InitializationScreen> {
       ServiceInitializationState(
         name: 'Text-to-Speech',
         description: 'Initializing speech synthesis engine',
+      ),
+      ServiceInitializationState(
+        name: 'Speech Recognition',
+        description: 'Initializing speech recognition engine',
       ),
       ServiceInitializationState(
         name: 'Gemma AI Model',
@@ -117,7 +122,10 @@ class _InitializationScreenState extends State<InitializationScreen> {
         case 1: // TTS Service
           await _initializeTtsService(service);
           break;
-        case 2: // Gemma Service
+        case 2: // Speech Recognition Service
+          await _initializeSpeechRecognitionService(service);
+          break;
+        case 3: // Gemma Service
           await _initializeGemmaService(service);
           break;
       }
@@ -185,6 +193,38 @@ class _InitializationScreenState extends State<InitializationScreen> {
           service.errorMessage = 'TTS initialization error: $e';
           service.fixInstructions =
               'Go to Settings > Accessibility > Text-to-Speech and ensure it\'s enabled.';
+        });
+      }
+    }
+  }
+
+  Future<void> _initializeSpeechRecognitionService(
+    ServiceInitializationState service,
+  ) async {
+    try {
+      final speechService = SpeechRecognitionService.instance;
+      await speechService.initialize();
+
+      if (mounted) {
+        setState(() {
+          if (speechService.isInitialized) {
+            service.status = ServiceStatus.success;
+            service.description = 'Speech recognition ready';
+          } else {
+            service.status = ServiceStatus.error;
+            service.errorMessage = 'Failed to initialize Speech Recognition';
+            service.fixInstructions =
+                'Please ensure your device has speech recognition capabilities enabled in system settings.';
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          service.status = ServiceStatus.error;
+          service.errorMessage = 'Speech recognition initialization error: $e';
+          service.fixInstructions =
+              'Go to Settings > Privacy & Security > Speech Recognition and ensure it\'s enabled.';
         });
       }
     }

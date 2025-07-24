@@ -18,7 +18,7 @@ class LlmSummarizationService implements Transformable {
   Future<void> initialize() async {}
 
   @override
-  Future<String> transform(String data) async {
+  Future<String> transform(dynamic data) async {
     return await summarizeText(data);
   }
 

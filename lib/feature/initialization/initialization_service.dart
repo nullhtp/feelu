@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../core/camera_service.dart';
 import '../../core/gemma_service.dart';
 import '../../core/speech_recognition_service.dart';
 import '../../core/vibration_notification_service.dart';
@@ -41,6 +42,10 @@ class InitializationService {
       ServiceInitializationState(
         name: 'Vibration Service',
         description: 'Checking device vibration capabilities',
+      ),
+      ServiceInitializationState(
+        name: 'Camera Service',
+        description: 'Initializing camera for photo recognition',
       ),
       ServiceInitializationState(
         name: 'Text-to-Speech',
@@ -93,10 +98,12 @@ class InitializationService {
         case 0:
           return await _initializeVibrationService(index);
         case 1:
-          return await _initializeTtsService(index);
+          return await _initializeCameraService(index);
         case 2:
-          return await _initializeSpeechRecognitionService(index);
+          return await _initializeTtsService(index);
         case 3:
+          return await _initializeSpeechRecognitionService(index);
+        case 4:
           return await _initializeGemmaService(index);
         default:
           return false;
@@ -127,6 +134,32 @@ class InitializationService {
         index,
         'Failed to check vibration capabilities: $e',
         'Please ensure your device supports vibration and try restarting the app.',
+      );
+      return false;
+    }
+  }
+
+  Future<bool> _initializeCameraService(int index) async {
+    try {
+      final cameraService = CameraService.instance;
+      final success = await cameraService.initialize();
+
+      if (success) {
+        _updateServiceStatus(index, ServiceStatus.success);
+        return true;
+      } else {
+        _updateServiceError(
+          index,
+          'Failed to initialize Camera Service',
+          'Please ensure your device has camera capabilities enabled in system settings.',
+        );
+        return false;
+      }
+    } catch (e) {
+      _updateServiceError(
+        index,
+        'Camera Service initialization error: $e',
+        'Go to Settings > Privacy & Security > Camera and ensure it\'s enabled.',
       );
       return false;
     }

@@ -96,6 +96,8 @@ class GemmaService {
       _inferenceModel = await gemma.createModel(
         modelType: ModelType.gemmaIt,
         maxTokens: 2048,
+        supportImage: true,
+        maxNumImages: 1,
       );
 
       _updateState(isModelLoading: false, errorMessage: null);

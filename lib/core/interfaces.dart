@@ -8,7 +8,7 @@ abstract interface class Outputable {
 
 abstract interface class Transformable {
   Future<void> initialize();
-  Future<String> transform(String data);
+  Future<String> transform(dynamic data);
   Future<void> dispose();
 }
 

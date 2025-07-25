@@ -1,106 +1,24 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-import '../core/interfaces.dart';
-import '../feature/braille_input/braille_service.dart';
-import 'braille_output.dart';
+import '../../../outputs/braille_text_output.dart';
 
-/// Braille Text Widget Output Service: Displays text as touchable braille symbols
-class BrailleTextWidgetService implements Outputable {
-  static BrailleTextWidgetService? _instance;
-  static BrailleTextWidgetService get instance =>
-      _instance ??= BrailleTextWidgetService._();
-  BrailleTextWidgetService._();
-
-  // Braille mapping: char -> 6-bit string
-  static final Map<String, String> _charToBraille = {
-    for (final entry in BrailleService.brailleMap.entries)
-      entry.value: entry.key,
-  };
-
-  final StreamController<List<BrailleSymbol>> _symbolsController =
-      StreamController<List<BrailleSymbol>>.broadcast();
-
-  Stream<List<BrailleSymbol>> get symbolsStream => _symbolsController.stream;
-  List<BrailleSymbol> _currentSymbols = [];
-
-  @override
-  Future<void> initialize() async {}
-
-  @override
-  Future<void> process(String data) async {
-    final symbols = <BrailleSymbol>[];
-
-    for (int i = 0; i < data.length; i++) {
-      final char = data[i].toLowerCase();
-      final brailleCode = _charToBraille[char] ?? '000000';
-      symbols.add(
-        BrailleSymbol(character: char, brailleCode: brailleCode, index: i),
-      );
-    }
-
-    _currentSymbols = symbols;
-    _symbolsController.add(symbols);
-  }
-
-  Future<void> vibrateSymbol(String brailleCode) async {
-    // Create a single character string to process through the BrailleOutputService
-    // Find the character that corresponds to this braille code
-    String? character;
-    for (final entry in _charToBraille.entries) {
-      if (entry.value == brailleCode) {
-        character = entry.key;
-        break;
-      }
-    }
-
-    if (character != null) {
-      await BrailleOutputService.instance.process(character);
-    }
-  }
-
-  List<BrailleSymbol> get currentSymbols => _currentSymbols;
-
-  @override
-  Future<void> dispose() async {
-    await _symbolsController.close();
-  }
-}
-
-/// Represents a single braille symbol with its character and code
-class BrailleSymbol {
-  final String character;
-  final String brailleCode;
-  final int index;
-
-  BrailleSymbol({
-    required this.character,
-    required this.brailleCode,
-    required this.index,
-  });
-}
-
-/// Widget that displays braille symbols as touchable elements with vertical scrolling
 class BrailleTextWidget extends StatefulWidget {
-  final BrailleTextWidgetService service;
+  final BrailleTextOutputService service = BrailleTextOutputService.instance;
   final double symbolSize;
   final double spacing;
   final Color activeColor;
   final Color inactiveColor;
   final Color backgroundColor;
-  final int symbolsPerRow;
 
-  const BrailleTextWidget({
+  BrailleTextWidget({
     super.key,
-    required this.service,
     this.symbolSize = 60.0,
     this.spacing = 16.0,
     this.activeColor = Colors.black,
     this.inactiveColor = Colors.grey,
     this.backgroundColor = Colors.white,
-    this.symbolsPerRow = 3,
   });
 
   @override
@@ -240,11 +158,7 @@ class _BrailleTextWidgetState extends State<BrailleTextWidget> {
   }
 
   Future<void> _onSymbolTap(BrailleSymbol symbol) async {
-    // Provide haptic feedback
-    await HapticFeedback.mediumImpact();
-
-    // Vibrate the symbol using braille output service
-    await widget.service.vibrateSymbol(symbol.brailleCode);
+    await widget.service.vibrateSymbol(symbol.character);
   }
 }
 

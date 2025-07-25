@@ -2,12 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 
-import '../core/interfaces.dart';
-import '../core/vibration_notification_service.dart';
 import '../feature/braille_input/braille_service.dart';
+import 'vibration_notification_service.dart';
 
 /// Braille Output Service: Converts text to braille and vibrates each symbol
-class BrailleOutputService implements Outputable {
+class BrailleOutputService {
   static BrailleOutputService? _instance;
   static BrailleOutputService get instance =>
       _instance ??= BrailleOutputService._();
@@ -19,11 +18,7 @@ class BrailleOutputService implements Outputable {
       entry.value: entry.key,
   };
 
-  @override
-  Future<void> initialize() async {}
-
-  @override
-  Future<void> process(String data) async {
+  Future<void> vibrateBraille(String data) async {
     for (final char in data.toLowerCase().split('')) {
       final braille = _charToBraille[char] ?? '000000';
       await _vibrateBrailleSymbol(braille);
@@ -73,7 +68,4 @@ class BrailleOutputService implements Outputable {
     );
     await Future.delayed(const Duration(milliseconds: 500));
   }
-
-  @override
-  Future<void> dispose() async {}
 }

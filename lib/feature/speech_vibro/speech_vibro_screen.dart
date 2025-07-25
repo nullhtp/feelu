@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:feelu/core/vibration_notification_service.dart';
 import 'package:flutter/material.dart';
 
+import '../braille_fullscreen/braille_fullscreen_screen.dart';
 import '../braille_input/braille_input_screen.dart';
 import 'speech_vibro_service.dart';
 import 'widgets/widgets.dart';
@@ -26,6 +28,7 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
   late StreamSubscription<SpeechVibroState> _stateSubscription;
   late StreamSubscription<String> _textSubscription;
   late StreamSubscription<String> _errorSubscription;
+  late StreamSubscription<bool> _fullscreenSubscription;
 
   @override
   void initState() {
@@ -74,6 +77,14 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
     _errorSubscription = _speechVibroService.errorStream.listen((error) {
       _showError(error);
     });
+
+    _fullscreenSubscription = _speechVibroService.openFullscreenStream.listen((
+      shouldOpen,
+    ) {
+      if (shouldOpen && mounted && _summarizedText.isNotEmpty) {
+        _openFullscreenBraille(_summarizedText);
+      }
+    });
   }
 
   void _handleStateChange(SpeechVibroState state) {
@@ -101,7 +112,7 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
   }
 
   Future<void> _repeatLastMessage() async {
-    await _speechVibroService.repeatLastMessage();
+    _openFullscreenBraille(_speechVibroService.lastMessage);
   }
 
   Future<void> _forceListen() async {
@@ -114,12 +125,29 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
     );
   }
 
+  void _openFullscreenBraille(String text) {
+    if (text.isEmpty) {
+      VibrationNotificationService.vibrateWarning();
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => BrailleFullscreenScreen(
+          sourceText: text,
+          sourceTitle: 'SPEECH SUMMARY RESULT',
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _pulseController.dispose();
     _stateSubscription.cancel();
     _textSubscription.cancel();
     _errorSubscription.cancel();
+    _fullscreenSubscription.cancel();
     _speechVibroService.dispose();
     super.dispose();
   }

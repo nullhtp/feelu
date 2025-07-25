@@ -27,41 +27,6 @@ class SummarizedOutputWidget extends StatelessWidget {
               letterSpacing: 1.2,
             ),
           ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white, width: 2),
-              ),
-              child: SingleChildScrollView(
-                child: Text(
-                  summarizedText.isEmpty
-                      ? 'Summarized text will appear here...'
-                      : summarizedText,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontFamily: 'monospace',
-                    color: summarizedText.isEmpty
-                        ? Colors.white60
-                        : Colors.white,
-                    height: 1.2,
-                    fontWeight: FontWeight.bold,
-                    shadows: const [
-                      Shadow(
-                        offset: Offset(1, 1),
-                        blurRadius: 2,
-                        color: Colors.black54,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );

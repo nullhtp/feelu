@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:feelu/core/camera_service.dart';
 import 'package:feelu/core/vibration_notification_service.dart';
-import 'package:feelu/outputs/braille_output.dart';
+import 'package:feelu/outputs/braille_text_widget.dart';
 import 'package:feelu/transformers/llm_recognition.dart';
 
 enum PhotoVibroState { ready, capturing, processing }
@@ -14,6 +14,8 @@ class PhotoVibroService {
   PhotoVibroService._internal();
 
   final CameraService _cameraService = CameraService.instance;
+  final BrailleTextWidgetService _brailleTextService =
+      BrailleTextWidgetService.instance;
 
   final StreamController<PhotoVibroState> _stateController =
       StreamController<PhotoVibroState>.broadcast();
@@ -33,6 +35,7 @@ class PhotoVibroService {
   PhotoVibroState get currentState => _currentState;
   String get lastRecognitionResult => _lastRecognitionResult;
   bool get isCameraReady => _cameraService.isCameraReady;
+  BrailleTextWidgetService get brailleTextService => _brailleTextService;
 
   Future<void> initialize() async {
     try {
@@ -82,8 +85,8 @@ class PhotoVibroService {
       _lastRecognitionResult = recognitionResult;
       _recognitionResultController.add(recognitionResult);
 
-      // Output result through braille
-      await BrailleOutputService.instance.process(recognitionResult);
+      // Output result through braille text widget
+      await _brailleTextService.process(recognitionResult);
 
       VibrationNotificationService.vibrateNotification();
     } catch (e) {
@@ -97,7 +100,7 @@ class PhotoVibroService {
   Future<void> repeatLastResult() async {
     if (_lastRecognitionResult.isNotEmpty) {
       VibrationNotificationService.vibrateNotification();
-      await BrailleOutputService.instance.process(_lastRecognitionResult);
+      await _brailleTextService.process(_lastRecognitionResult);
       VibrationNotificationService.vibrateNotification();
     } else {
       VibrationNotificationService.vibrateWarning();

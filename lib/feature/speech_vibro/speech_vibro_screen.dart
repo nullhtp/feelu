@@ -100,10 +100,6 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
     }
   }
 
-  Future<void> _startListening() async {
-    await _speechVibroService.startListening();
-  }
-
   Future<void> _repeatLastMessage() async {
     await _speechVibroService.repeatLastMessage();
   }

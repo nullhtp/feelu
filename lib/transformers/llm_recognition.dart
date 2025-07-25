@@ -29,7 +29,7 @@ class LlmRecognitionService implements Transformable {
     try {
       // Create and send the summarization request
       final text =
-          'You are a helpful assistant image recognition. You should return the objects from the image. You should not explain yourself. Final answer should be no more than 10 words. Return only objects you are sure about. If you are not sure on any object, return "Empty"';
+          'You are a helpful assistant image recognition. You should return the objects from the image. You should not explain yourself. Final answer should be no more than 10 words. Return only list of objects you are sure about. If you are not see any object, return "Empty"';
 
       final userMessage = Message.withImage(
         text: text,

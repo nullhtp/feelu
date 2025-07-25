@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:feelu/core/camera_service.dart';
-import 'package:feelu/core/interfaces.dart';
 import 'package:feelu/core/vibration_notification_service.dart';
 import 'package:feelu/outputs/braille_output.dart';
 import 'package:feelu/transformers/llm_recognition.dart';
@@ -13,11 +12,6 @@ class PhotoVibroService {
   static final PhotoVibroService _instance = PhotoVibroService._internal();
   static PhotoVibroService get instance => _instance;
   PhotoVibroService._internal();
-
-  final Pipeline _pipeline = Pipeline(
-    transformable: LlmRecognitionService.instance,
-    outputable: BrailleOutputService.instance,
-  );
 
   final CameraService _cameraService = CameraService.instance;
 

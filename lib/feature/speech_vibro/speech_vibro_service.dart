@@ -5,6 +5,7 @@ import 'package:feelu/core/speech_recognition_service.dart';
 import 'package:feelu/core/vibration_notification_service.dart';
 import 'package:feelu/outputs/braille_text_output.dart';
 import 'package:feelu/transformers/llm_summarization.dart';
+import 'package:flutter/material.dart';
 
 enum SpeechVibroState { ready, listening, processing }
 
@@ -15,13 +16,9 @@ class SpeechVibroService {
 
   final SpeechRecognitionService _speechRecognitionService =
       SpeechRecognitionService.instance;
-  final BrailleTextOutputService _brailleTextService =
-      BrailleTextOutputService.instance;
+  late BrailleTextOutputService _brailleTextService;
 
-  final Pipeline _summarizationPipeline = Pipeline(
-    transformable: LlmSummarizationService.instance,
-    outputable: BrailleTextOutputService.instance,
-  );
+  late Pipeline _summarizationPipeline;
 
   final StreamController<String> _summarizedTextController =
       StreamController<String>.broadcast();
@@ -29,13 +26,10 @@ class SpeechVibroService {
       StreamController<SpeechVibroState>.broadcast();
   final StreamController<String> _errorController =
       StreamController<String>.broadcast();
-  final StreamController<bool> _openFullscreenController =
-      StreamController<bool>.broadcast();
 
   Stream<String> get summarizedTextStream => _summarizedTextController.stream;
   Stream<SpeechVibroState> get stateStream => _stateController.stream;
   Stream<String> get errorStream => _errorController.stream;
-  Stream<bool> get openFullscreenStream => _openFullscreenController.stream;
 
   SpeechVibroState _currentState = SpeechVibroState.ready;
   String _lastMessage = '';
@@ -45,12 +39,17 @@ class SpeechVibroService {
   String get lastMessage => _lastMessage;
   BrailleTextOutputService get brailleTextService => _brailleTextService;
 
-  Future<void> initialize() async {
+  Future<void> initialize(BuildContext context) async {
     try {
       await _speechRecognitionService.initialize();
-      await _brailleTextService.initialize();
-      await _summarizationPipeline.initialize();
+      _brailleTextService = BrailleTextOutputService(context: context);
+      _summarizationPipeline = Pipeline(
+        transformable: LlmSummarizationService.instance,
+        outputable: _brailleTextService,
+      );
       _subscribeToTransformedData();
+
+      await _summarizationPipeline.initialize();
 
       // Notify user they've entered speech vibro mode with wave-like pattern
       VibrationNotificationService.vibratePattern(
@@ -69,11 +68,6 @@ class SpeechVibroService {
           (transformedData) {
             _lastMessage = transformedData;
             _summarizedTextController.add(transformedData);
-
-            // Signal to open fullscreen braille view when data is available
-            if (transformedData.isNotEmpty) {
-              _openFullscreenController.add(true);
-            }
           },
           onError: (error) {
             final errorMessage = 'Error processing text: ${error.toString()}';
@@ -123,16 +117,6 @@ class SpeechVibroService {
     }
   }
 
-  Future<void> repeatLastMessage() async {
-    if (_lastMessage.isNotEmpty) {
-      VibrationNotificationService.vibrateNotification();
-      await _brailleTextService.process(_lastMessage);
-      VibrationNotificationService.vibrateNotification();
-    } else {
-      VibrationNotificationService.vibrateWarning();
-    }
-  }
-
   Future<void> forceListen() async {
     VibrationNotificationService.vibrateNotification();
     await startListening();
@@ -150,6 +134,5 @@ class SpeechVibroService {
     _summarizedTextController.close();
     _stateController.close();
     _errorController.close();
-    _openFullscreenController.close();
   }
 }

@@ -2,25 +2,19 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 
-import '../feature/braille_input/braille_service.dart';
+import 'domain/braille_code_map.dart';
 import 'vibration_notification_service.dart';
 
 /// Braille Output Service: Converts text to braille and vibrates each symbol
-class BrailleOutputService {
-  static BrailleOutputService? _instance;
-  static BrailleOutputService get instance =>
-      _instance ??= BrailleOutputService._();
-  BrailleOutputService._();
-
-  // Braille mapping: char -> 6-bit string
-  static final Map<String, String> _charToBraille = {
-    for (final entry in BrailleService.brailleMap.entries)
-      entry.value: entry.key,
-  };
+class BrailleVibrationService {
+  static BrailleVibrationService? _instance;
+  static BrailleVibrationService get instance =>
+      _instance ??= BrailleVibrationService._();
+  BrailleVibrationService._();
 
   Future<void> vibrateBraille(String data) async {
     for (final char in data.toLowerCase().split('')) {
-      final braille = _charToBraille[char] ?? '000000';
+      final braille = charToBraille[char] ?? '000000';
       await _vibrateBrailleSymbol(braille);
       // Small pause between symbols
       await Future.delayed(const Duration(milliseconds: 100));

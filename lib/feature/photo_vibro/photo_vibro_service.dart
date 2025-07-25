@@ -3,7 +3,9 @@ import 'dart:typed_data';
 
 import 'package:feelu/core/camera_service.dart';
 import 'package:feelu/core/vibration_notification_service.dart';
+import 'package:feelu/outputs/braille_text_output.dart';
 import 'package:feelu/transformers/llm_recognition.dart';
+import 'package:flutter/material.dart';
 
 enum PhotoVibroState { ready, capturing, processing }
 
@@ -13,21 +15,15 @@ class PhotoVibroService {
   PhotoVibroService._internal();
 
   final CameraService _cameraService = CameraService.instance;
+  late BrailleTextOutputService _brailleTextService;
 
   final StreamController<PhotoVibroState> _stateController =
       StreamController<PhotoVibroState>.broadcast();
   final StreamController<String> _errorController =
       StreamController<String>.broadcast();
-  final StreamController<String> _recognitionResultController =
-      StreamController<String>.broadcast();
-  final StreamController<bool> _openFullscreenController =
-      StreamController<bool>.broadcast();
 
   Stream<PhotoVibroState> get stateStream => _stateController.stream;
   Stream<String> get errorStream => _errorController.stream;
-  Stream<String> get recognitionResultStream =>
-      _recognitionResultController.stream;
-  Stream<bool> get openFullscreenStream => _openFullscreenController.stream;
 
   PhotoVibroState _currentState = PhotoVibroState.ready;
   String _lastRecognitionResult = '';
@@ -35,8 +31,9 @@ class PhotoVibroService {
   PhotoVibroState get currentState => _currentState;
   String get lastRecognitionResult => _lastRecognitionResult;
   bool get isCameraReady => _cameraService.isCameraReady;
+  BrailleTextOutputService get brailleTextService => _brailleTextService;
 
-  Future<void> initialize() async {
+  Future<void> initialize(BuildContext context) async {
     try {
       // Check if camera service is already initialized
       if (!_cameraService.isInitialized) {
@@ -57,6 +54,7 @@ class PhotoVibroService {
       _errorController.add('Failed to initialize photo vibro: ${e.toString()}');
       rethrow;
     }
+    _brailleTextService = BrailleTextOutputService(context: context);
   }
 
   Future<void> captureAndProcess() async {
@@ -82,27 +80,16 @@ class PhotoVibroService {
       );
 
       _lastRecognitionResult = recognitionResult;
-      _recognitionResultController.add(recognitionResult);
+
+      // Process through braille text service (this will trigger fullscreen automatically)
+      await _brailleTextService.process(recognitionResult);
 
       VibrationNotificationService.vibrateNotification();
-
-      // Signal to open fullscreen braille view
-      _openFullscreenController.add(true);
     } catch (e) {
       VibrationNotificationService.vibrateError();
       _errorController.add('Error capturing/processing image: ${e.toString()}');
     } finally {
       _updateState(PhotoVibroState.ready);
-    }
-  }
-
-  Future<void> repeatLastResult() async {
-    if (_lastRecognitionResult.isNotEmpty) {
-      VibrationNotificationService.vibrateNotification();
-      _openFullscreenController.add(true);
-      VibrationNotificationService.vibrateNotification();
-    } else {
-      VibrationNotificationService.vibrateWarning();
     }
   }
 
@@ -114,7 +101,5 @@ class PhotoVibroService {
   void dispose() {
     _stateController.close();
     _errorController.close();
-    _recognitionResultController.close();
-    _openFullscreenController.close();
   }
 }

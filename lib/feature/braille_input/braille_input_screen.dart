@@ -1,6 +1,8 @@
+import 'dart:async';
+
 import 'package:feelu/core/interfaces.dart';
 import 'package:feelu/core/vibration_notification_service.dart';
-import 'package:feelu/outputs/braille_output.dart';
+import 'package:feelu/outputs/braille_text_output.dart';
 import 'package:feelu/outputs/tts.dart';
 import 'package:feelu/transformers/llm_assistant.dart';
 import 'package:feelu/transformers/llm_decode.dart';
@@ -24,22 +26,28 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
   String _displayText = '';
   bool _isSpeaking = false; // Add flag to prevent multiple speak calls
 
+  late BrailleTextOutputService _brailleTextOutputService;
+
   final Pipeline _outputPipeline = Pipeline(
     transformable: LlmDecodeService.instance,
     outputable: TtsService.instance,
   );
 
-  final Pipeline _assistantPipeline = Pipeline(
-    transformable: LlmAssistantService.instance,
-    outputable: BrailleOutputService.instance,
-  );
+  late Pipeline _assistantPipeline;
 
   @override
   void initState() {
     super.initState();
     _brailleService = BrailleService();
     _outputPipeline.initialize();
+    _brailleTextOutputService = BrailleTextOutputService(context: context);
+    _assistantPipeline = Pipeline(
+      transformable: LlmAssistantService.instance,
+      outputable: _brailleTextOutputService,
+    );
+
     _assistantPipeline.initialize();
+
     // Notify user they've entered braille input mode with dot-like pattern
     VibrationNotificationService.vibratePattern(
       pattern: [200, 300, 200, 300, 200],
@@ -97,7 +105,6 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
 
   @override
   void dispose() {
-    _outputPipeline.dispose();
     super.dispose();
   }
 

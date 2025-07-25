@@ -1,10 +1,8 @@
 import 'dart:async';
 
-import 'package:feelu/core/vibration_notification_service.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/camera_service.dart';
-import '../braille_fullscreen/braille_fullscreen_screen.dart';
 import '../braille_input/braille_input_screen.dart';
 import 'photo_vibro_service.dart';
 import 'widgets/widgets.dart';
@@ -25,12 +23,9 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
   final CameraService _cameraService = CameraService.instance;
 
   PhotoVibroState _currentState = PhotoVibroState.ready;
-  String _recognitionResult = '';
 
   late StreamSubscription<PhotoVibroState> _stateSubscription;
-  late StreamSubscription<String> _resultSubscription;
   late StreamSubscription<String> _errorSubscription;
-  late StreamSubscription<bool> _fullscreenSubscription;
 
   @override
   void initState() {
@@ -52,7 +47,7 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
 
   Future<void> _initializeService() async {
     try {
-      await _photoVibroService.initialize();
+      await _photoVibroService.initialize(context);
     } catch (e) {
       _showError('Failed to initialize photo vibro: ${e.toString()}');
     }
@@ -68,26 +63,8 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
       }
     });
 
-    _resultSubscription = _photoVibroService.recognitionResultStream.listen((
-      result,
-    ) {
-      if (mounted) {
-        setState(() {
-          _recognitionResult = result;
-        });
-      }
-    });
-
     _errorSubscription = _photoVibroService.errorStream.listen((error) {
       _showError(error);
-    });
-
-    _fullscreenSubscription = _photoVibroService.openFullscreenStream.listen((
-      shouldOpen,
-    ) {
-      if (shouldOpen && mounted && _recognitionResult.isNotEmpty) {
-        _openFullscreenBraille(_recognitionResult);
-      }
     });
   }
 
@@ -119,29 +96,9 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
     await _photoVibroService.captureAndProcess();
   }
 
-  Future<void> _repeatLastResult() async {
-    await _photoVibroService.repeatLastResult();
-  }
-
   void _navigateToBrailleInput() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => const BrailleInputScreen()),
-    );
-  }
-
-  void _openFullscreenBraille(String text) {
-    if (text.isEmpty) {
-      VibrationNotificationService.vibrateWarning();
-      return;
-    }
-
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => BrailleFullscreenScreen(
-          sourceText: text,
-          sourceTitle: 'PHOTO RECOGNITION RESULT',
-        ),
-      ),
     );
   }
 
@@ -149,9 +106,7 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
   void dispose() {
     _pulseController.dispose();
     _stateSubscription.cancel();
-    _resultSubscription.cancel();
     _errorSubscription.cancel();
-    _fullscreenSubscription.cancel();
     _photoVibroService.dispose();
     super.dispose();
   }
@@ -163,7 +118,7 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
       body: SafeArea(
         child: PhotoVibroGestureDetector(
           onSwipeRight: _navigateToBrailleInput,
-          onSwipeDown: _repeatLastResult,
+          onSwipeDown: () {},
           onTap: _captureImage,
           child: Column(
             children: [

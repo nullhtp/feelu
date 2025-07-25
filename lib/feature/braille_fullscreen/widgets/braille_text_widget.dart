@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../outputs/braille_text_output.dart';
+import '../../../core/braille_vibration.dart';
+import '../../../feature/braille_input/braille_symbol.dart';
 
 class BrailleTextWidget extends StatefulWidget {
-  final BrailleTextOutputService service = BrailleTextOutputService.instance;
+  final List<BrailleSymbol> symbols;
   final double symbolSize;
   final double spacing;
   final Color activeColor;
@@ -14,6 +15,7 @@ class BrailleTextWidget extends StatefulWidget {
 
   BrailleTextWidget({
     super.key,
+    required this.symbols,
     this.symbolSize = 60.0,
     this.spacing = 16.0,
     this.activeColor = Colors.black,
@@ -31,18 +33,13 @@ class _BrailleTextWidgetState extends State<BrailleTextWidget> {
   final Map<int, GlobalKey> _symbolKeys = {};
   int? _lastVibratedIndex;
   Timer? _vibrationCooldown;
+  final BrailleVibrationService _brailleVibrationService =
+      BrailleVibrationService.instance;
 
   @override
   void initState() {
     super.initState();
-    _symbolsSubscription = widget.service.symbolsStream.listen((symbols) {
-      setState(() {
-        _symbols = symbols;
-        _updateSymbolKeys();
-      });
-    });
-    // Initialize with current symbols if any
-    _symbols = widget.service.currentSymbols;
+    _symbols = widget.symbols;
     _updateSymbolKeys();
   }
 
@@ -158,7 +155,7 @@ class _BrailleTextWidgetState extends State<BrailleTextWidget> {
   }
 
   Future<void> _onSymbolTap(BrailleSymbol symbol) async {
-    await widget.service.vibrateSymbol(symbol.character);
+    await _brailleVibrationService.vibrateBraille(symbol.character);
   }
 }
 

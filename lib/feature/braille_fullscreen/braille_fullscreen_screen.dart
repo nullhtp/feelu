@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../core/domain/braille_code_map.dart';
 import '../../core/vibration_notification_service.dart';
-import '../../outputs/braille_text_output.dart';
+import '../../feature/braille_input/braille_symbol.dart';
 import 'widgets/braille_text_widget.dart';
 
 class BrailleFullscreenScreen extends StatefulWidget {
-  final BrailleTextOutputService brailleService =
-      BrailleTextOutputService.instance;
   final String sourceText;
   final String sourceTitle;
   final Color themeColor;
@@ -30,10 +29,31 @@ class _BrailleFullscreenScreenState extends State<BrailleFullscreenScreen> {
     _initializeScreen();
   }
 
+  List<BrailleSymbol> _brailleSymbols = [];
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  List<BrailleSymbol> convertToBrailleSymbols(String text) {
+    final symbols = <BrailleSymbol>[];
+
+    for (int i = 0; i < text.length; i++) {
+      final char = text[i].toLowerCase();
+      final brailleCode = charToBraille[char] ?? '000000';
+      symbols.add(
+        BrailleSymbol(character: char, brailleCode: brailleCode, index: i),
+      );
+    }
+
+    return symbols;
+  }
+
   Future<void> _initializeScreen() async {
     // Process the text when screen opens
     if (widget.sourceText.isNotEmpty) {
-      widget.brailleService.process(widget.sourceText);
+      _brailleSymbols = convertToBrailleSymbols(widget.sourceText);
     }
 
     // Provide entrance notification
@@ -138,12 +158,8 @@ class _BrailleFullscreenScreenState extends State<BrailleFullscreenScreen> {
         activeColor: widget.themeColor,
         inactiveColor: Colors.grey.shade700,
         backgroundColor: Colors.black,
+        symbols: _brailleSymbols,
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }

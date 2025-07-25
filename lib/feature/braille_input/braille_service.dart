@@ -1,37 +1,7 @@
+import 'package:feelu/core/domain/braille_code_map.dart';
 import 'package:feelu/core/vibration_notification_service.dart';
 
 class BrailleService {
-  // Braille code mapping (6-dot system simplified to 3-dot for this implementation)
-  static const Map<String, String> brailleMap = {
-    '100000': 'a',
-    '110000': 'b',
-    '100100': 'c',
-    '100110': 'd',
-    '100010': 'e',
-    '110100': 'f',
-    '110110': 'g',
-    '110010': 'h',
-    '010100': 'i',
-    '010110': 'j',
-    '101000': 'k',
-    '111000': 'l',
-    '101100': 'm',
-    '101110': 'n',
-    '101010': 'o',
-    '111100': 'p',
-    '111110': 'q',
-    '111010': 'r',
-    '011100': 's',
-    '011110': 't',
-    '101001': 'u',
-    '111001': 'v',
-    '010111': 'w',
-    '101101': 'x',
-    '101111': 'y',
-    '101011': 'z',
-    '000000': ' ',
-  };
-
   String currentInput = '';
   String firstHalf = '';
   String secondHalf = '';

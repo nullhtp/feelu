@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../braille_input/braille_input_screen.dart';
-import 'models/service_initialization_state.dart';
 import 'initialization_service.dart';
+import 'models/service_initialization_state.dart';
 import 'widgets/widgets.dart';
 
 class InitializationScreen extends StatefulWidget {
@@ -156,7 +156,6 @@ class _InitializationScreenState extends State<InitializationScreen> {
       return ErrorStateWidget(
         service: _services[_currentIndex],
         onRetry: _retryInitialization,
-        onSkip: _navigateToBrailleScreen,
       );
     } else {
       return const SuccessStateWidget();

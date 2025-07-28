@@ -5,13 +5,11 @@ import '../models/service_initialization_state.dart';
 class ErrorStateWidget extends StatelessWidget {
   final ServiceInitializationState service;
   final VoidCallback onRetry;
-  final VoidCallback onSkip;
 
   const ErrorStateWidget({
     super.key,
     required this.service,
     required this.onRetry,
-    required this.onSkip,
   });
 
   @override
@@ -76,19 +74,6 @@ class ErrorStateWidget extends StatelessWidget {
                 child: const Text(
                   'Retry',
                   style: TextStyle(color: Colors.white, fontSize: 16),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: TextButton(
-                onPressed: onSkip,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: Text(
-                  'Skip',
-                  style: TextStyle(color: Colors.grey[400], fontSize: 16),
                 ),
               ),
             ),

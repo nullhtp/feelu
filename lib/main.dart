@@ -3,8 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+import 'core/di/service_locator.dart';
+import 'core/di/service_registration.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize dependency injection
+  await ServiceLocator.init();
+  await ServiceRegistration.registerAllServices();
 
   // Set app-wide landscape orientation
   await SystemChrome.setPreferredOrientations([

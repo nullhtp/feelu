@@ -1,21 +1,28 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:feelu/core/braille_vibration.dart';
-import 'package:feelu/core/camera_service.dart';
-import 'package:feelu/core/vibration_notification_service.dart';
+import 'package:feelu/core/di/service_locator.dart';
+import 'package:feelu/core/services/services.dart';
 import 'package:feelu/outputs/braille_text_output.dart';
 import 'package:feelu/transformers/llm_recognition.dart';
 import 'package:flutter/material.dart';
 
 enum PhotoVibroState { ready, capturing, processing }
 
-class PhotoVibroService {
-  static final PhotoVibroService _instance = PhotoVibroService._internal();
-  static PhotoVibroService get instance => _instance;
-  PhotoVibroService._internal();
+abstract class IPhotoVibroService {
+  Stream<PhotoVibroState> get stateStream;
+  Stream<String> get errorStream;
 
-  final CameraService _cameraService = CameraService.instance;
+  Future<void> initialize(BuildContext context);
+  Future<void> captureAndProcess();
+  void dispose();
+}
+
+class PhotoVibroService implements IPhotoVibroService {
+  final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
+  final ICameraService _cameraService = ServiceLocator.get<ICameraService>();
+  final IBrailleVibrationService _brailleVibrationService =
+      ServiceLocator.get<IBrailleVibrationService>();
   late BrailleTextOutputService _brailleTextService;
 
   final StreamController<PhotoVibroState> _stateController =
@@ -23,7 +30,12 @@ class PhotoVibroService {
   final StreamController<String> _errorController =
       StreamController<String>.broadcast();
 
+  final ILlmRecognitionService _llmRecognitionService =
+      ServiceLocator.get<ILlmRecognitionService>();
+
+  @override
   Stream<PhotoVibroState> get stateStream => _stateController.stream;
+  @override
   Stream<String> get errorStream => _errorController.stream;
 
   PhotoVibroState _currentState = PhotoVibroState.ready;
@@ -31,23 +43,13 @@ class PhotoVibroService {
 
   PhotoVibroState get currentState => _currentState;
   String get lastRecognitionResult => _lastRecognitionResult;
-  bool get isCameraReady => _cameraService.isCameraReady;
   BrailleTextOutputService get brailleTextService => _brailleTextService;
 
+  @override
   Future<void> initialize(BuildContext context) async {
     try {
-      // Check if camera service is already initialized
-      if (!_cameraService.isInitialized) {
-        _errorController.add(
-          'Camera service not initialized. Please restart the app.',
-        );
-        throw Exception(
-          'Camera service must be initialized during app startup',
-        );
-      }
-
       // Notify user they've entered photo vibro mode with camera-like pattern
-      BrailleVibrationService.instance.vibrateBraille('c');
+      _brailleVibrationService.vibrateBraille('c');
     } catch (e) {
       _errorController.add('Failed to initialize photo vibro: ${e.toString()}');
       rethrow;
@@ -55,8 +57,9 @@ class PhotoVibroService {
     _brailleTextService = BrailleTextOutputService(context: context);
   }
 
+  @override
   Future<void> captureAndProcess() async {
-    if (!isCameraReady || _currentState != PhotoVibroState.ready) {
+    if (_currentState != PhotoVibroState.ready) {
       return;
     }
 
@@ -73,7 +76,7 @@ class PhotoVibroService {
       _updateState(PhotoVibroState.processing);
 
       // Process image with LLM recognition
-      final recognitionResult = await LlmRecognitionService.instance.transform(
+      final recognitionResult = await _llmRecognitionService.transform(
         imageBytes,
       );
 
@@ -82,9 +85,11 @@ class PhotoVibroService {
       // Process through braille text service (this will trigger fullscreen automatically)
       await _brailleTextService.process(recognitionResult);
 
-      VibrationNotificationService.vibrateNotification();
+      _loggingService.info('Image processed');
     } catch (e) {
-      VibrationNotificationService.vibrateError();
+      _loggingService.error(
+        'Error capturing/processing image: ${e.toString()}',
+      );
       _errorController.add('Error capturing/processing image: ${e.toString()}');
     } finally {
       _updateState(PhotoVibroState.ready);
@@ -96,6 +101,7 @@ class PhotoVibroService {
     _stateController.add(newState);
   }
 
+  @override
   void dispose() {
     _stateController.close();
     _errorController.close();

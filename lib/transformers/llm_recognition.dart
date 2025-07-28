@@ -1,15 +1,15 @@
 import 'package:flutter_gemma/flutter_gemma.dart';
 
-import '../core/gemma_service.dart';
+import '../core/di/service_locator.dart';
 import '../core/interfaces.dart';
+import '../core/services/services.dart';
+
+abstract class ILlmRecognitionService implements Transformable {}
 
 /// Service class that handles image recognition using Gemma AI model
-class LlmRecognitionService implements Transformable {
-  static LlmRecognitionService? _instance;
-  static LlmRecognitionService get instance =>
-      _instance ??= LlmRecognitionService._();
-
-  LlmRecognitionService._();
+class LlmRecognitionService implements ILlmRecognitionService {
+  final IAiModelService _aiModelService = ServiceLocator.get<IAiModelService>();
+  final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
 
   @override
   Future<void> dispose() async {}
@@ -24,7 +24,7 @@ class LlmRecognitionService implements Transformable {
       return 'No image provided';
     }
 
-    final session = await GemmaService.instance.createSession();
+    final session = await _aiModelService.createSession();
 
     try {
       // Create and send the summarization request
@@ -40,7 +40,7 @@ class LlmRecognitionService implements Transformable {
 
       // Generate and stream the response
       final response = await session.getResponse();
-      print('Summarization response: $response');
+      _loggingService.info('LLM Recognition Response: $response');
       return response;
     } catch (e) {
       throw Exception('Error generating summarization: $e');

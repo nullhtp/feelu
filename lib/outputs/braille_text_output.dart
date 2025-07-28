@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../core/braille_vibration.dart';
+import '../core/di/service_locator.dart';
 import '../core/interfaces.dart';
+import '../core/services/braille_vibration.dart';
 import '../feature/braille_fullscreen/braille_fullscreen_screen.dart';
 
 enum BrailleSource { general, speech, photo, assistant }
@@ -14,6 +15,8 @@ class BrailleTextOutputService implements Outputable {
 
   final StreamController<String> _fullscreenController =
       StreamController<String>.broadcast();
+  final IBrailleVibrationService _brailleVibrationService =
+      ServiceLocator.get<IBrailleVibrationService>();
 
   Stream<String> get fullscreenStream => _fullscreenController.stream;
 
@@ -27,7 +30,10 @@ class BrailleTextOutputService implements Outputable {
       _fullscreenController.add(data);
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => BrailleFullscreenScreen(sourceText: data),
+          builder: (context) => BrailleFullscreenScreen(
+            sourceText: data,
+            brailleVibrationService: _brailleVibrationService,
+          ),
         ),
       );
     }
@@ -35,7 +41,7 @@ class BrailleTextOutputService implements Outputable {
 
   Future<void> vibrateSymbol(String? character) async {
     if (character != null) {
-      await BrailleVibrationService.instance.vibrateBraille(character);
+      await _brailleVibrationService.vibrateBraille(character);
     }
   }
 

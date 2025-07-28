@@ -1,36 +1,42 @@
 import 'dart:async';
 
-import 'package:feelu/core/braille_vibration.dart';
+import 'package:feelu/core/di/service_locator.dart';
 import 'package:feelu/core/interfaces.dart';
-import 'package:feelu/core/speech_recognition_service.dart';
-import 'package:feelu/core/vibration_notification_service.dart';
+import 'package:feelu/core/services/services.dart';
 import 'package:feelu/outputs/braille_text_output.dart';
 import 'package:feelu/transformers/llm_summarization.dart';
 import 'package:flutter/material.dart';
 
 enum SpeechVibroState { ready, listening, processing }
 
-class SpeechVibroService {
-  static final SpeechVibroService _instance = SpeechVibroService._internal();
-  static SpeechVibroService get instance => _instance;
-  SpeechVibroService._internal();
+abstract class ISpeechVibroService {
+  Stream<SpeechVibroState> get stateStream;
 
-  final SpeechRecognitionService _speechRecognitionService =
-      SpeechRecognitionService.instance;
+  Future<void> initialize(BuildContext context);
+  Future<void> startListening();
+  Future<void> forceListen();
+  void dispose();
+}
+
+class SpeechVibroService implements ISpeechVibroService {
+  final ISpeechRecognitionService _speechRecognitionService =
+      ServiceLocator.get<ISpeechRecognitionService>();
+  final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
+
+  final IBrailleVibrationService _brailleVibrationService =
+      ServiceLocator.get<IBrailleVibrationService>();
+
   late BrailleTextOutputService _brailleTextService;
-
   late Pipeline _summarizationPipeline;
 
   final StreamController<String> _summarizedTextController =
       StreamController<String>.broadcast();
   final StreamController<SpeechVibroState> _stateController =
       StreamController<SpeechVibroState>.broadcast();
-  final StreamController<String> _errorController =
-      StreamController<String>.broadcast();
 
   Stream<String> get summarizedTextStream => _summarizedTextController.stream;
+  @override
   Stream<SpeechVibroState> get stateStream => _stateController.stream;
-  Stream<String> get errorStream => _errorController.stream;
 
   SpeechVibroState _currentState = SpeechVibroState.ready;
   String _lastMessage = '';
@@ -39,25 +45,25 @@ class SpeechVibroService {
   SpeechVibroState get currentState => _currentState;
   String get lastMessage => _lastMessage;
   BrailleTextOutputService get brailleTextService => _brailleTextService;
+  ILlmSummarizationService get llmSummarizationService =>
+      ServiceLocator.get<ILlmSummarizationService>();
 
+  @override
   Future<void> initialize(BuildContext context) async {
     try {
-      await _speechRecognitionService.initialize();
       _brailleTextService = BrailleTextOutputService(context: context);
       _summarizationPipeline = Pipeline(
-        transformable: LlmSummarizationService.instance,
+        transformable: llmSummarizationService,
         outputable: _brailleTextService,
       );
       _subscribeToTransformedData();
 
       await _summarizationPipeline.initialize();
 
-      BrailleVibrationService.instance.vibrateBraille('s');
+      _brailleVibrationService.vibrateBraille('s');
     } catch (e) {
-      if (!_errorController.isClosed) {
-        _errorController.add('Failed to initialize services: ${e.toString()}');
-      }
-      throw e;
+      _loggingService.error('Failed to initialize services: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -72,17 +78,12 @@ class SpeechVibroService {
           },
           onError: (error) {
             final errorMessage = 'Error processing text: ${error.toString()}';
-            if (!_summarizedTextController.isClosed) {
-              _summarizedTextController.add(errorMessage);
-            }
-            if (!_errorController.isClosed) {
-              _errorController.add(errorMessage);
-            }
-            VibrationNotificationService.vibrateError();
+            _loggingService.error(errorMessage);
           },
         );
   }
 
+  @override
   Future<void> startListening() async {
     if (_currentState != SpeechVibroState.ready) return;
 
@@ -91,7 +92,7 @@ class SpeechVibroService {
       _summarizedTextController.add('');
     }
 
-    VibrationNotificationService.vibrateNotification();
+    _loggingService.info('Listening');
 
     try {
       final recognizedText = await _speechRecognitionService.startListening();
@@ -101,16 +102,11 @@ class SpeechVibroService {
       if (recognizedText.isNotEmpty) {
         await _processRecognizedText(recognizedText);
       } else {
-        VibrationNotificationService.vibrateWarning();
+        _loggingService.warning('No text recognized');
       }
     } catch (e) {
       _updateState(SpeechVibroState.ready);
-      VibrationNotificationService.vibrateWarning();
-      if (!_errorController.isClosed) {
-        _errorController.add(
-          'Error during speech recognition: ${e.toString()}',
-        );
-      }
+      _loggingService.error('Error during speech recognition: ${e.toString()}');
     }
   }
 
@@ -119,19 +115,19 @@ class SpeechVibroService {
 
     try {
       await _summarizationPipeline.process(text);
-      VibrationNotificationService.vibrateNotification();
+      _loggingService.info('Processing recognized text');
     } catch (e) {
-      VibrationNotificationService.vibrateError();
-      if (!_errorController.isClosed) {
-        _errorController.add('Error processing text: ${e.toString()}');
-      }
+      _loggingService.error(
+        'Error processing recognized text: ${e.toString()}',
+      );
     } finally {
       _updateState(SpeechVibroState.ready);
     }
   }
 
+  @override
   Future<void> forceListen() async {
-    VibrationNotificationService.vibrateNotification();
+    _loggingService.info('Force listening');
     await startListening();
   }
 
@@ -142,12 +138,12 @@ class SpeechVibroService {
     }
   }
 
+  @override
   void dispose() {
     _speechRecognitionService.dispose();
     _summarizationPipeline.dispose();
     _transformedDataSubscription?.cancel();
     _summarizedTextController.close();
     _stateController.close();
-    _errorController.close();
   }
 }

@@ -1,15 +1,15 @@
 import 'package:flutter_gemma/flutter_gemma.dart';
 
-import '../core/gemma_service.dart';
+import '../core/di/service_locator.dart';
 import '../core/interfaces.dart';
+import '../core/services/services.dart';
+
+abstract class ILlmSummarizationService implements Transformable {}
 
 /// Service class that handles text summarization using Gemma AI model
-class LlmSummarizationService implements Transformable {
-  static LlmSummarizationService? _instance;
-  static LlmSummarizationService get instance =>
-      _instance ??= LlmSummarizationService._();
-
-  LlmSummarizationService._();
+class LlmSummarizationService implements ILlmSummarizationService {
+  final IAiModelService _aiModelService = ServiceLocator.get<IAiModelService>();
+  final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
 
   @override
   Future<void> dispose() async {}
@@ -26,7 +26,7 @@ class LlmSummarizationService implements Transformable {
     if (text.isEmpty) {
       return '';
     }
-    final session = await GemmaService.instance.createSession();
+    final session = await _aiModelService.createSession();
 
     try {
       // Create and send the summarization request
@@ -38,7 +38,7 @@ class LlmSummarizationService implements Transformable {
 
       // Generate and stream the response
       final response = await session.getResponse();
-      print('Summarization response: $response');
+      _loggingService.info('LLM Summarization Response: $response');
       return response;
     } catch (e) {
       throw Exception('Error generating summarization: $e');

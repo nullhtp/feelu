@@ -1,55 +1,52 @@
-import 'package:flutter/foundation.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
-class SpeechRecognitionService {
-  static SpeechRecognitionService? _instance;
-  static SpeechRecognitionService get instance =>
-      _instance ??= SpeechRecognitionService._();
+import '../di/service_locator.dart';
+import 'logging_service.dart';
 
-  SpeechRecognitionService._();
+abstract class ISpeechRecognitionService {
+  bool get isInitialized;
+  Future<void> initialize();
+  Future<String> startListening();
+  Future<void> stopListening();
+  Future<void> dispose();
+}
 
+class SpeechRecognitionService implements ISpeechRecognitionService {
   final SpeechToText _speechToText = SpeechToText();
   bool _isInitialized = false;
   bool _isListening = false;
+  final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
 
   // Getters
+  @override
   bool get isInitialized => _isInitialized;
-  bool get isListening => _isListening;
 
+  @override
   Future<void> initialize() async {
     try {
       _isInitialized = await _speechToText.initialize(
         onError: (error) {
-          if (kDebugMode) {
-            print('Speech recognition error: ${error.errorMsg}');
-          }
+          _loggingService.error('Speech recognition error: ${error.errorMsg}');
         },
         onStatus: (status) {
-          if (kDebugMode) {
-            print('Speech recognition status: $status');
-          }
+          _loggingService.debug('Speech recognition status: $status');
           if (status == 'done') {
             _isListening = false;
           }
         },
       );
 
-      if (kDebugMode) {
-        print('Speech recognition initialized: $_isInitialized');
-      }
+      _loggingService.debug('Speech recognition initialized: $_isInitialized');
     } catch (e) {
-      if (kDebugMode) {
-        print('Speech recognition initialization error: $e');
-      }
+      _loggingService.error('Speech recognition initialization error: $e');
       _isInitialized = false;
     }
   }
 
+  @override
   Future<String> startListening() async {
     if (_isListening) {
-      if (kDebugMode) {
-        print('Already listening');
-      }
+      _loggingService.error('Already listening');
       return '';
     }
 
@@ -65,11 +62,9 @@ class SpeechRecognitionService {
       // Start listening for speech with continuous partial results
       await _speechToText.listen(
         onResult: (result) {
-          if (kDebugMode) {
-            print(
-              'Speech recognition result: ${result.recognizedWords}, final: ${result.finalResult}',
-            );
-          }
+          _loggingService.debug(
+            'Speech recognition result: ${result.recognizedWords}, final: ${result.finalResult}',
+          );
 
           // Update recognized text
           recognizedText = result.recognizedWords;
@@ -80,17 +75,13 @@ class SpeechRecognitionService {
             lastRecognizedText = recognizedText;
             lastTextTime = DateTime.now();
             hasNewText = true;
-            if (kDebugMode) {
-              print('New text detected, resetting timer');
-            }
+            _loggingService.debug('New text detected, resetting timer');
           }
 
           // If this is a final result, we're done
           if (result.finalResult && recognizedText.isNotEmpty) {
             shouldContinue = false;
-            if (kDebugMode) {
-              print('Final result received');
-            }
+            _loggingService.debug('Final result received');
           }
         },
         listenFor: const Duration(minutes: 5), // Extended total time limit
@@ -114,17 +105,13 @@ class SpeechRecognitionService {
         final timeSinceLastText = DateTime.now().difference(lastTextTime);
 
         if (hasNewText && timeSinceLastText.inSeconds >= 3) {
-          if (kDebugMode) {
-            print('3 seconds of silence detected, stopping...');
-          }
+          _loggingService.debug('3 seconds of silence detected, stopping...');
           break;
         }
 
         // Safety timeout after 5 minutes
         if (DateTime.now().difference(lastTextTime).inMinutes >= 5) {
-          if (kDebugMode) {
-            print('5 minute timeout reached');
-          }
+          _loggingService.debug('5 minute timeout reached');
           break;
         }
       }
@@ -137,15 +124,14 @@ class SpeechRecognitionService {
       _isListening = false;
       return recognizedText;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error starting speech recognition: $e');
-      }
+      _loggingService.error('Error starting speech recognition: $e');
       _isListening = false;
       return '';
     }
   }
 
   /// Stop listening
+  @override
   Future<void> stopListening() async {
     if (_isListening) {
       await _speechToText.stop();
@@ -153,11 +139,7 @@ class SpeechRecognitionService {
     }
   }
 
-  /// Check if speech recognition is available
-  Future<bool> isAvailable() async {
-    return _isInitialized;
-  }
-
+  @override
   Future<void> dispose() async {
     await stopListening();
   }

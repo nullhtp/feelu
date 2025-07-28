@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/di/service_locator.dart';
 import '../braille_input/braille_input_screen.dart';
 import 'initialization_service.dart';
 import 'models/service_initialization_state.dart';
@@ -13,8 +14,8 @@ class InitializationScreen extends StatefulWidget {
 }
 
 class _InitializationScreenState extends State<InitializationScreen> {
-  final InitializationService _initializationService =
-      InitializationService.instance;
+  final IInitializationService _initializationService =
+      ServiceLocator.get<IInitializationService>();
 
   List<ServiceInitializationState> _services = [];
   int _currentIndex = 0;
@@ -145,20 +146,35 @@ class _InitializationScreenState extends State<InitializationScreen> {
 
   Widget _buildCurrentState() {
     if (_services.isEmpty) {
-      return const CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-      );
+      return const CircularProgressIndicator(color: Colors.blue);
     }
 
-    if (!_isComplete) {
-      return CurrentServiceWidget(service: _services[_currentIndex]);
+    if (_isComplete) {
+      if (_hasErrors) {
+        // Find the first service with error
+        final errorService = _services.firstWhere(
+          (service) => service.isError,
+          orElse: () => _services[_currentIndex],
+        );
+        return ErrorStateWidget(
+          service: errorService,
+          onRetry: _retryInitialization,
+        );
+      } else {
+        return const SuccessStateWidget();
+      }
     } else if (_hasErrors) {
+      // Find the first service with error
+      final errorService = _services.firstWhere(
+        (service) => service.isError,
+        orElse: () => _services[_currentIndex],
+      );
       return ErrorStateWidget(
-        service: _services[_currentIndex],
+        service: errorService,
         onRetry: _retryInitialization,
       );
     } else {
-      return const SuccessStateWidget();
+      return CurrentServiceWidget(service: _services[_currentIndex]);
     }
   }
 }

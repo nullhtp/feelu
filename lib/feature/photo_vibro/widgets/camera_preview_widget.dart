@@ -3,17 +3,12 @@ import 'package:flutter/material.dart';
 
 class CameraPreviewWidget extends StatelessWidget {
   final CameraController? cameraController;
-  final bool isInitialized;
 
-  const CameraPreviewWidget({
-    super.key,
-    required this.cameraController,
-    required this.isInitialized,
-  });
+  const CameraPreviewWidget({super.key, required this.cameraController});
 
   @override
   Widget build(BuildContext context) {
-    if (!isInitialized || cameraController == null) {
+    if (cameraController == null) {
       return Container(
         width: double.infinity,
         height: double.infinity,

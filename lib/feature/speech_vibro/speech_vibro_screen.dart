@@ -21,10 +21,8 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
   final SpeechVibroService _speechVibroService = SpeechVibroService.instance;
 
   SpeechVibroState _currentState = SpeechVibroState.ready;
-  String _summarizedText = '';
 
   late StreamSubscription<SpeechVibroState> _stateSubscription;
-  late StreamSubscription<String> _textSubscription;
   late StreamSubscription<String> _errorSubscription;
 
   @override
@@ -56,14 +54,6 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
           _currentState = state;
         });
         _handleStateChange(state);
-      }
-    });
-
-    _textSubscription = _speechVibroService.summarizedTextStream.listen((text) {
-      if (mounted) {
-        setState(() {
-          _summarizedText = text;
-        });
       }
     });
 
@@ -110,7 +100,6 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
   void dispose() {
     _pulseController.dispose();
     _stateSubscription.cancel();
-    _textSubscription.cancel();
     _errorSubscription.cancel();
     _speechVibroService.dispose();
     super.dispose();

@@ -48,7 +48,7 @@ class StatusIndicatorWidget extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Swipe down to repeat | Swipe up to force listen',
+                    'Tap to listen',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.green.shade300,

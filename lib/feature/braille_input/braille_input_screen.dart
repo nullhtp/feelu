@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:feelu/core/braille_vibration.dart';
 import 'package:feelu/core/interfaces.dart';
 import 'package:feelu/core/vibration_notification_service.dart';
 import 'package:feelu/outputs/braille_text_output.dart';
@@ -49,18 +50,13 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
     _assistantPipeline.initialize();
 
     // Notify user they've entered braille input mode with dot-like pattern
-    VibrationNotificationService.vibratePattern(
-      pattern: [200, 300, 200, 300, 200],
-      amplitude: 128,
-    );
+    BrailleVibrationService.instance.vibrateBraille('i');
   }
 
   void _onTextGenerated(String text) {
     setState(() {
       _displayText = text;
     });
-    // Debug: Add haptic feedback when text is generated
-    HapticFeedback.lightImpact();
   }
 
   void _backspace() {

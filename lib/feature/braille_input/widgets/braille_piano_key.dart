@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class BraillePianoKey extends StatefulWidget {
   final String label;
@@ -52,7 +51,6 @@ class _BraillePianoKeyState extends State<BraillePianoKey>
       _isCurrentlyPressed = true;
     });
     _animationController.forward();
-    HapticFeedback.heavyImpact(); // Strong haptic feedback for blind users
   }
 
   void _handleTapUp(TapUpDetails details) {

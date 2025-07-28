@@ -26,14 +26,14 @@ class BrailleVibrationService {
     if (braille.length != 6) return;
     final firstHalf = braille.substring(0, 3);
     final secondHalf = braille.substring(3, 6);
-    await _vibrateBrailleHalf(firstHalf);
+    await vibrateBrailleHalf(firstHalf);
     // Short pause between halves
     await Future.delayed(const Duration(milliseconds: 60));
-    await _vibrateBrailleHalf(secondHalf);
+    await vibrateBrailleHalf(secondHalf);
   }
 
   /// Vibrate for a 3-bit half (string of '0'/'1')
-  Future<void> _vibrateBrailleHalf(String half) async {
+  Future<void> vibrateBrailleHalf(String half) async {
     if (half == '000') {
       // All blank: use HapticFeedback.lightImpact
       await HapticFeedback.lightImpact();

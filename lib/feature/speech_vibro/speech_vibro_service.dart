@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:feelu/core/braille_vibration.dart';
 import 'package:feelu/core/interfaces.dart';
 import 'package:feelu/core/speech_recognition_service.dart';
 import 'package:feelu/core/vibration_notification_service.dart';
@@ -51,11 +52,7 @@ class SpeechVibroService {
 
       await _summarizationPipeline.initialize();
 
-      // Notify user they've entered speech vibro mode with wave-like pattern
-      VibrationNotificationService.vibratePattern(
-        pattern: [100, 50, 100, 50, 100, 50, 100, 50, 100],
-        amplitude: 100,
-      );
+      BrailleVibrationService.instance.vibrateBraille('s');
     } catch (e) {
       if (!_errorController.isClosed) {
         _errorController.add('Failed to initialize services: ${e.toString()}');

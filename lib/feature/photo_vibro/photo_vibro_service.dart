@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:feelu/core/braille_vibration.dart';
 import 'package:feelu/core/camera_service.dart';
 import 'package:feelu/core/vibration_notification_service.dart';
 import 'package:feelu/outputs/braille_text_output.dart';
@@ -46,10 +47,7 @@ class PhotoVibroService {
       }
 
       // Notify user they've entered photo vibro mode with camera-like pattern
-      VibrationNotificationService.vibratePattern(
-        pattern: [150, 100, 150, 100, 300],
-        amplitude: 150,
-      );
+      BrailleVibrationService.instance.vibrateBraille('c');
     } catch (e) {
       _errorController.add('Failed to initialize photo vibro: ${e.toString()}');
       rethrow;

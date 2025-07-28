@@ -1,5 +1,7 @@
+import 'package:feelu/core/braille_vibration.dart';
 import 'package:feelu/core/domain/braille_code_map.dart';
 import 'package:feelu/core/vibration_notification_service.dart';
+import 'package:flutter/services.dart';
 
 class BrailleService {
   String currentInput = '';
@@ -7,6 +9,8 @@ class BrailleService {
   String secondHalf = '';
   List<String> outputText = [];
   bool isFirstHalf = true;
+  final BrailleVibrationService _brailleVibrationService =
+      BrailleVibrationService.instance;
 
   /// Convert 3-key input to half braille pattern
   String convertKeysToBraille(bool key1, bool key2, bool key3) {
@@ -31,6 +35,7 @@ class BrailleService {
     if (isFirstHalf) {
       firstHalf = pattern;
       isFirstHalf = false;
+      HapticFeedback.heavyImpact();
     } else {
       secondHalf = pattern;
       _processCompleteBraille();
@@ -44,6 +49,7 @@ class BrailleService {
 
     if (character != null) {
       outputText.add(character);
+      _brailleVibrationService.vibrateBraille(character);
     } else {
       // If pattern not found, add a placeholder
       VibrationNotificationService.vibrateWarning();

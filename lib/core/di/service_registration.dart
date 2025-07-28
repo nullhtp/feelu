@@ -16,6 +16,7 @@ class ServiceRegistration {
   static Future<void> registerAllServices() async {
     await registerCoreServices();
     await registerTransformers();
+    await registerFeatureServices();
   }
 
   /// Register core services
@@ -80,14 +81,5 @@ class ServiceRegistration {
     ServiceLocator.registerLazySingleton<IInitializationService>(
       () => InitializationService(),
     );
-  }
-
-  /// Convenience method to check if all core services are registered
-  static bool areAllCoreServicesRegistered() {
-    return ServiceLocator.isRegistered<AppConfig>() &&
-        ServiceLocator.isRegistered<ILoggingService>() &&
-        ServiceLocator.isRegistered<CameraService>() &&
-        ServiceLocator.isRegistered<SpeechRecognitionService>() &&
-        ServiceLocator.isRegistered<GemmaService>();
   }
 }

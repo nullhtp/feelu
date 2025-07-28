@@ -57,34 +57,76 @@ class SpeechRecognitionService {
       _isListening = true;
 
       String recognizedText = '';
-      bool isComplete = false;
+      String lastRecognizedText = '';
+      bool hasNewText = false;
+      DateTime lastTextTime = DateTime.now();
+      bool shouldContinue = true;
 
-      // Start listening for speech
+      // Start listening for speech with continuous partial results
       await _speechToText.listen(
         onResult: (result) {
           if (kDebugMode) {
-            print('Speech recognition result: ${result.recognizedWords}');
+            print(
+              'Speech recognition result: ${result.recognizedWords}, final: ${result.finalResult}',
+            );
           }
+
+          // Update recognized text
           recognizedText = result.recognizedWords;
-          if (result.finalResult) {
-            isComplete = true;
+
+          // Check if we have new text (text has changed)
+          if (recognizedText != lastRecognizedText &&
+              recognizedText.isNotEmpty) {
+            lastRecognizedText = recognizedText;
+            lastTextTime = DateTime.now();
+            hasNewText = true;
+            if (kDebugMode) {
+              print('New text detected, resetting timer');
+            }
+          }
+
+          // If this is a final result, we're done
+          if (result.finalResult && recognizedText.isNotEmpty) {
+            shouldContinue = false;
+            if (kDebugMode) {
+              print('Final result received');
+            }
           }
         },
-        listenFor: const Duration(seconds: 30),
-        pauseFor: const Duration(seconds: 3),
+        listenFor: const Duration(minutes: 5), // Extended total time limit
+        pauseFor: const Duration(
+          seconds: 5,
+        ), // Very short pause to get more frequent updates
         localeId: 'en_US',
         listenOptions: SpeechListenOptions(
-          partialResults: false,
+          partialResults: true,
           cancelOnError: true,
           listenMode: ListenMode.dictation,
+          autoPunctuation: true,
         ),
       );
 
-      // Wait for completion or timeout
-      int timeout = 0;
-      while (!isComplete && timeout < 30) {
-        await Future.delayed(const Duration(seconds: 1));
-        timeout++;
+      // Custom loop to handle 3-second silence detection
+      while (shouldContinue) {
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        // Check if it's been more than 3 seconds since last text update
+        final timeSinceLastText = DateTime.now().difference(lastTextTime);
+
+        if (hasNewText && timeSinceLastText.inSeconds >= 3) {
+          if (kDebugMode) {
+            print('3 seconds of silence detected, stopping...');
+          }
+          break;
+        }
+
+        // Safety timeout after 5 minutes
+        if (DateTime.now().difference(lastTextTime).inMinutes >= 5) {
+          if (kDebugMode) {
+            print('5 minute timeout reached');
+          }
+          break;
+        }
       }
 
       // Stop listening if still active

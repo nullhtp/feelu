@@ -31,7 +31,7 @@ class LlmSummarizationService implements Transformable {
     try {
       // Create and send the summarization request
       text =
-          'You are a helpful assistant for morse code text preparation. Summarize the following text in a very short and concise way, use very basic and short words, you should not explain yourself. Final answer should be less than 10 words. TEXT: "$text"';
+          'You are a helpful speech summarization assistant. Summarize the following text in a very short and concise way, use very basic and short words, you should not explain yourself. Final answer should be less than 10 words. TEXT: "$text"';
 
       final userMessage = Message.text(text: text, isUser: true);
       await session.addQueryChunk(userMessage);

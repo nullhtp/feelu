@@ -1,7 +1,8 @@
-import 'package:feelu/core/braille_vibration.dart';
 import 'package:feelu/core/domain/braille_code_map.dart';
-import 'package:feelu/core/vibration_notification_service.dart';
 import 'package:flutter/services.dart';
+
+import '../../core/di/service_locator.dart';
+import '../../core/services/services.dart';
 
 class BrailleService {
   String currentInput = '';
@@ -9,8 +10,9 @@ class BrailleService {
   String secondHalf = '';
   List<String> outputText = [];
   bool isFirstHalf = true;
-  final BrailleVibrationService _brailleVibrationService =
-      BrailleVibrationService.instance;
+  final IBrailleVibrationService _brailleVibrationService =
+      ServiceLocator.get<IBrailleVibrationService>();
+  final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
 
   /// Convert 3-key input to half braille pattern
   String convertKeysToBraille(bool key1, bool key2, bool key3) {
@@ -52,7 +54,7 @@ class BrailleService {
       _brailleVibrationService.vibrateBraille(character);
     } else {
       // If pattern not found, add a placeholder
-      VibrationNotificationService.vibrateWarning();
+      _loggingService.warning('Braille pattern not found: $fullPattern');
     }
 
     // Reset for next input

@@ -1,16 +1,21 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
-import '../core/interfaces.dart';
+import '../di/service_locator.dart';
+import 'logging_service.dart';
+
+abstract class ITtsService {
+  Future<bool> initialize();
+  Future<void> dispose();
+  Future<void> speak(String text);
+  Future<void> stop();
+  Future<void> pause();
+}
 
 /// Text-to-Speech service for offline speech synthesis
-class TtsService implements Outputable {
-  static TtsService? _instance;
-  static TtsService get instance => _instance ??= TtsService._();
-  TtsService._();
-
+class TtsService implements ITtsService {
+  final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
   final FlutterTts _flutterTts = FlutterTts();
   bool _isInitialized = false;
   bool _isSpeaking = false;
@@ -44,42 +49,30 @@ class TtsService implements Outputable {
       // Set up handlers
       _flutterTts.setStartHandler(() {
         _isSpeaking = true;
-        if (kDebugMode) {
-          print("TTS: Speech started");
-        }
+        _loggingService.info("TTS: Speech started");
       });
 
       _flutterTts.setCompletionHandler(() {
         _isSpeaking = false;
-        if (kDebugMode) {
-          print("TTS: Speech completed");
-        }
+        _loggingService.info("TTS: Speech completed");
       });
 
       _flutterTts.setCancelHandler(() {
         _isSpeaking = false;
-        if (kDebugMode) {
-          print("TTS: Speech cancelled");
-        }
+        _loggingService.info("TTS: Speech cancelled");
       });
 
       _flutterTts.setPauseHandler(() {
-        if (kDebugMode) {
-          print("TTS: Speech paused");
-        }
+        _loggingService.info("TTS: Speech paused");
       });
 
       _flutterTts.setContinueHandler(() {
-        if (kDebugMode) {
-          print("TTS: Speech continued");
-        }
+        _loggingService.info("TTS: Speech continued");
       });
 
       _flutterTts.setErrorHandler((msg) {
         _isSpeaking = false;
-        if (kDebugMode) {
-          print("TTS Error: $msg");
-        }
+        _loggingService.error("TTS Error: $msg");
       });
 
       // Get available languages and engines
@@ -90,14 +83,10 @@ class TtsService implements Outputable {
       await _setDefaultConfiguration();
 
       _isInitialized = true;
-      if (kDebugMode) {
-        print("TTS Service initialized successfully");
-      }
+      _loggingService.info("TTS Service initialized successfully");
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print("TTS initialization error: $e");
-      }
+      _loggingService.error("TTS initialization error: $e");
       return false;
     }
   }
@@ -106,13 +95,9 @@ class TtsService implements Outputable {
   Future<void> _getLanguages() async {
     try {
       _languages = await _flutterTts.getLanguages;
-      if (kDebugMode) {
-        print("Available languages: $_languages");
-      }
+      _loggingService.info("Available languages: $_languages");
     } catch (e) {
-      if (kDebugMode) {
-        print("Error getting languages: $e");
-      }
+      _loggingService.error("Error getting languages: $e");
       _languages = [];
     }
   }
@@ -122,14 +107,10 @@ class TtsService implements Outputable {
     try {
       if (Platform.isAndroid) {
         _engines = await _flutterTts.getEngines;
-        if (kDebugMode) {
-          print("Available engines: $_engines");
-        }
+        _loggingService.info("Available engines: $_engines");
       }
     } catch (e) {
-      if (kDebugMode) {
-        print("Error getting engines: $e");
-      }
+      _loggingService.error("Error getting engines: $e");
       _engines = [];
     }
   }
@@ -161,31 +142,19 @@ class TtsService implements Outputable {
       await _flutterTts.setPitch(_pitch);
       await _flutterTts.setSpeechRate(_speechRate);
     } catch (e) {
-      if (kDebugMode) {
-        print("Error setting default configuration: $e");
-      }
+      _loggingService.error("Error setting default configuration: $e");
     }
-  }
-
-  /// Implementation of Outputable interface - processes text for speech output
-  @override
-  Future<void> process(String data) async {
-    await speak(data);
   }
 
   /// Speak the given text
   Future<bool> speak(String text) async {
     if (!_isInitialized) {
-      if (kDebugMode) {
-        print("TTS not initialized");
-      }
+      _loggingService.error("TTS not initialized");
       return false;
     }
 
     if (text.trim().isEmpty) {
-      if (kDebugMode) {
-        print("Cannot speak empty text");
-      }
+      _loggingService.error("Cannot speak empty text");
       return false;
     }
 
@@ -197,9 +166,7 @@ class TtsService implements Outputable {
       await _flutterTts.speak(text);
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print("Error speaking text: $e");
-      }
+      _loggingService.error("Error speaking text: $e");
       return false;
     }
   }
@@ -210,9 +177,7 @@ class TtsService implements Outputable {
       await _flutterTts.stop();
       _isSpeaking = false;
     } catch (e) {
-      if (kDebugMode) {
-        print("Error stopping speech: $e");
-      }
+      _loggingService.error("Error stopping speech: $e");
     }
   }
 
@@ -221,9 +186,7 @@ class TtsService implements Outputable {
     try {
       await _flutterTts.pause();
     } catch (e) {
-      if (kDebugMode) {
-        print("Error pausing speech: $e");
-      }
+      _loggingService.error("Error pausing speech: $e");
     }
   }
 
@@ -233,9 +196,7 @@ class TtsService implements Outputable {
       _volume = volume.clamp(0.0, 1.0);
       await _flutterTts.setVolume(_volume);
     } catch (e) {
-      if (kDebugMode) {
-        print("Error setting volume: $e");
-      }
+      _loggingService.error("Error setting volume: $e");
     }
   }
 
@@ -245,9 +206,7 @@ class TtsService implements Outputable {
       _pitch = pitch.clamp(0.5, 2.0);
       await _flutterTts.setPitch(_pitch);
     } catch (e) {
-      if (kDebugMode) {
-        print("Error setting pitch: $e");
-      }
+      _loggingService.error("Error setting pitch: $e");
     }
   }
 
@@ -257,9 +216,7 @@ class TtsService implements Outputable {
       _speechRate = rate.clamp(0.0, 1.0);
       await _flutterTts.setSpeechRate(_speechRate);
     } catch (e) {
-      if (kDebugMode) {
-        print("Error setting speech rate: $e");
-      }
+      _loggingService.error("Error setting speech rate: $e");
     }
   }
 
@@ -271,15 +228,11 @@ class TtsService implements Outputable {
         _selectedLanguage = language;
         return true;
       } else {
-        if (kDebugMode) {
-          print("Language not supported: $language");
-        }
+        _loggingService.error("Language not supported: $language");
         return false;
       }
     } catch (e) {
-      if (kDebugMode) {
-        print("Error setting language: $e");
-      }
+      _loggingService.error("Error setting language: $e");
       return false;
     }
   }
@@ -287,9 +240,7 @@ class TtsService implements Outputable {
   /// Set TTS engine (Android only)
   Future<bool> setEngine(String engine) async {
     if (!Platform.isAndroid) {
-      if (kDebugMode) {
-        print("Engine selection only available on Android");
-      }
+      _loggingService.error("Engine selection only available on Android");
       return false;
     }
 
@@ -299,15 +250,11 @@ class TtsService implements Outputable {
         _selectedEngine = engine;
         return true;
       } else {
-        if (kDebugMode) {
-          print("Engine not available: $engine");
-        }
+        _loggingService.error("Engine not available: $engine");
         return false;
       }
     } catch (e) {
-      if (kDebugMode) {
-        print("Error setting engine: $e");
-      }
+      _loggingService.error("Error setting engine: $e");
       return false;
     }
   }
@@ -318,9 +265,7 @@ class TtsService implements Outputable {
       final result = await _flutterTts.isLanguageAvailable(language);
       return result;
     } catch (e) {
-      if (kDebugMode) {
-        print("Error checking language availability: $e");
-      }
+      _loggingService.error("Error checking language availability: $e");
       return false;
     }
   }
@@ -331,9 +276,7 @@ class TtsService implements Outputable {
       final voices = await _flutterTts.getVoices;
       return voices;
     } catch (e) {
-      if (kDebugMode) {
-        print("Error getting voices: $e");
-      }
+      _loggingService.error("Error getting voices: $e");
       return [];
     }
   }
@@ -344,9 +287,7 @@ class TtsService implements Outputable {
       await _flutterTts.setVoice(voice);
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print("Error setting voice: $e");
-      }
+      _loggingService.error("Error setting voice: $e");
       return false;
     }
   }

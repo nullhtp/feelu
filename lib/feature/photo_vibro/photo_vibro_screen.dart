@@ -2,10 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../core/camera_service.dart';
+import '../../core/di/service_locator.dart';
+import '../../core/services/camera_service.dart';
 import '../braille_input/braille_input_screen.dart';
 import 'photo_vibro_service.dart';
-import 'widgets/widgets.dart';
+import 'widgets/camera_preview_widget.dart';
+import 'widgets/camera_status_indicator_widget.dart';
+import 'widgets/photo_vibro_gesture_detector.dart';
+import 'widgets/recognition_result_widget.dart';
 
 class PhotoVibroScreen extends StatefulWidget {
   const PhotoVibroScreen({super.key});
@@ -19,8 +23,8 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
-  final PhotoVibroService _photoVibroService = PhotoVibroService.instance;
-  final CameraService _cameraService = CameraService.instance;
+  late final PhotoVibroService _photoVibroService;
+  late final CameraService _cameraService;
 
   PhotoVibroState _currentState = PhotoVibroState.ready;
 
@@ -30,6 +34,11 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
   @override
   void initState() {
     super.initState();
+
+    // Get services from DI container
+    _photoVibroService = ServiceLocator.get<PhotoVibroService>();
+    _cameraService = ServiceLocator.get<CameraService>();
+
     _initializeAnimations();
     _initializeService();
     _subscribeToStreams();
@@ -37,10 +46,10 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
 
   void _initializeAnimations() {
     _pulseController = AnimationController(
-      duration: const Duration(seconds: 1),
+      duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    _pulseAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+    _pulseAnimation = Tween<double>(begin: 0.9, end: 1.1).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
   }
@@ -71,10 +80,10 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
   void _handleStateChange(PhotoVibroState state) {
     switch (state) {
       case PhotoVibroState.capturing:
-      case PhotoVibroState.processing:
         _pulseController.repeat(reverse: true);
         break;
       case PhotoVibroState.ready:
+      case PhotoVibroState.processing:
         _pulseController.stop();
         break;
     }
@@ -92,7 +101,7 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
     }
   }
 
-  Future<void> _captureImage() async {
+  Future<void> _capturePhoto() async {
     await _photoVibroService.captureAndProcess();
   }
 
@@ -119,21 +128,59 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
         child: PhotoVibroGestureDetector(
           onSwipeRight: _navigateToBrailleInput,
           onSwipeDown: () {},
-          onTap: _captureImage,
-          child: Column(
+          onTap: _capturePhoto,
+          child: Stack(
             children: [
-              CameraStatusIndicatorWidget(
-                isCapturing: _currentState == PhotoVibroState.capturing,
-                isProcessing: _currentState == PhotoVibroState.processing,
-                pulseAnimation: _pulseAnimation,
-              ),
-              Expanded(
-                child: Stack(
+              // Camera preview background
+              if (_cameraService.isCameraReady)
+                CameraPreviewWidget(
+                  cameraController: _cameraService.cameraController,
+                  isInitialized: _cameraService.isCameraReady,
+                ),
+
+              // Main content overlay
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.3),
+                      Colors.black.withOpacity(0.7),
+                    ],
+                  ),
+                ),
+                child: Column(
                   children: [
-                    // Camera preview
-                    CameraPreviewWidget(
-                      cameraController: _cameraService.cameraController,
-                      isInitialized: _cameraService.isCameraReady,
+                    // Status indicator
+                    Expanded(
+                      flex: 1,
+                      child: Center(
+                        child: CameraStatusIndicatorWidget(
+                          isCapturing:
+                              _currentState == PhotoVibroState.capturing,
+                          isProcessing:
+                              _currentState == PhotoVibroState.processing,
+                          pulseAnimation: _pulseAnimation,
+                        ),
+                      ),
+                    ),
+
+                    // Recognition result
+                    Expanded(
+                      flex: 1,
+                      child: Center(
+                        child: RecognitionResultWidget(
+                          recognitionResult:
+                              _currentState == PhotoVibroState.ready
+                              ? 'Tap to capture photo'
+                              : _currentState == PhotoVibroState.capturing
+                              ? 'Capturing...'
+                              : 'Processing...',
+                        ),
+                      ),
                     ),
                   ],
                 ),

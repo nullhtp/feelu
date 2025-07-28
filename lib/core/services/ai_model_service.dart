@@ -5,16 +5,31 @@ import 'package:flutter_gemma/core/chat.dart';
 import 'package:flutter_gemma/core/model.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
 
-import 'model.dart';
+import '../domain/model.dart';
 import 'model_downloader.dart';
 
-/// Service class that handles all Gemma AI model operations
-class GemmaService {
-  static GemmaService? _instance;
-  static GemmaService get instance => _instance ??= GemmaService._();
+abstract class IAiModelService {
+  Stream<bool> get modelLoadingStream;
+  Stream<String> get loadingMessageStream;
+  Stream<double?> get downloadProgressStream;
+  Stream<String?> get errorMessageStream;
+  Stream<bool> get canRetryStream;
 
-  GemmaService._();
+  bool get isInitialized;
+  String? get errorMessage;
 
+  Future<void> initialize();
+  Future<void> retryInitialization();
+  Future<InferenceChat> createChat({
+    bool supportImage = true,
+    double temperature = 0,
+  });
+  Future<InferenceModelSession> createSession();
+  Future<void> clearCorruptedModel();
+  void dispose();
+}
+
+class GemmaService implements IAiModelService {
   InferenceModel? _inferenceModel;
   late final ModelDownloader _downloaderDataSource;
 
@@ -48,6 +63,7 @@ class GemmaService {
   bool get isInitialized => _inferenceModel != null;
 
   /// Initialize the Gemma service
+  @override
   Future<void> initialize() async {
     _downloaderDataSource = ModelDownloader(model: Model.gemma3nNetwork);
     await _initializeModel();
@@ -138,11 +154,13 @@ class GemmaService {
   }
 
   /// Retry model initialization
+  @override
   Future<void> retryInitialization() async {
     await _initializeModel();
   }
 
   /// Send a message and get a response stream
+  @override
   Future<InferenceChat> createChat({
     bool supportImage = true,
     double temperature = 0,
@@ -155,6 +173,7 @@ class GemmaService {
     );
   }
 
+  @override
   Future<InferenceModelSession> createSession() async {
     return await _inferenceModel!.createSession(
       temperature: 0,
@@ -164,6 +183,7 @@ class GemmaService {
   }
 
   /// Clear corrupted model
+  @override
   Future<void> clearCorruptedModel() async {
     await _downloaderDataSource.clearCorruptedModel();
   }
@@ -203,6 +223,7 @@ class GemmaService {
   }
 
   /// Dispose of resources
+  @override
   void dispose() {
     _modelLoadingController.close();
     _loadingMessageController.close();

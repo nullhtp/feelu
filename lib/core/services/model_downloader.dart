@@ -1,16 +1,27 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'config.dart';
-import 'model.dart';
+import '../config/app_config.dart';
+import '../di/service_locator.dart';
+import '../domain/model.dart';
+import 'logging_service.dart';
 
-class ModelDownloader {
+abstract class IModelDownloader {
+  Future<void> downloadModel({
+    required Function(double) onProgress,
+    int maxRetries = 3,
+  });
+}
+
+class ModelDownloader implements IModelDownloader {
   final Model model;
+
+  final AppConfig _config = ServiceLocator.get<AppConfig>();
+  final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
 
   final modelManager = FlutterGemmaPlugin.instance.modelManager;
 
@@ -29,25 +40,19 @@ class ModelDownloader {
   /// Validates if the downloaded file is complete and not corrupted
   Future<bool> _validateModelFile(File file) async {
     if (!file.existsSync()) {
-      if (kDebugMode) {
-        print('Model file does not exist');
-      }
+      _loggingService.error('Model file does not exist');
       return false;
     }
 
     final fileSize = await file.length();
-    if (kDebugMode) {
-      print(
-        'Model file size: $fileSize bytes (${(fileSize / 1024 / 1024).toStringAsFixed(2)} MB)',
-      );
-    }
+    _loggingService.debug(
+      'Model file size: $fileSize bytes (${(fileSize / 1024 / 1024).toStringAsFixed(2)} MB)',
+    );
 
     if (fileSize < _minimumModelSize) {
-      if (kDebugMode) {
-        print(
-          'Model file too small: $fileSize bytes (minimum: $_minimumModelSize)',
-        );
-      }
+      _loggingService.error(
+        'Model file too small: $fileSize bytes (minimum: $_minimumModelSize)',
+      );
       return false;
     }
 
@@ -56,24 +61,20 @@ class ModelDownloader {
       final bytes = await file.openRead(0, 8).toList();
       if (bytes.isNotEmpty) {
         final firstBytes = bytes.expand((x) => x).take(8).toList();
-        if (kDebugMode) {
-          print(
-            'Model file first 8 bytes: ${firstBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ')}',
-          );
-        }
+        _loggingService.debug(
+          'Model file first 8 bytes: ${firstBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ')}',
+        );
 
         // Basic format validation - check if it's not just zeros or corrupted
         if (firstBytes.every((b) => b == 0)) {
-          if (kDebugMode) {
-            print('Model file appears to be empty or corrupted (all zeros)');
-          }
+          _loggingService.error(
+            'Model file appears to be empty or corrupted (all zeros)',
+          );
           return false;
         }
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error reading model file for validation: $e');
-      }
+      _loggingService.error('Error reading model file for validation: $e');
       return false;
     }
 
@@ -88,20 +89,14 @@ class ModelDownloader {
 
       if (file.existsSync()) {
         await file.delete();
-        if (kDebugMode) {
-          print('Deleted corrupted model file: $filePath');
-        }
+        _loggingService.debug('Deleted corrupted model file: $filePath');
       }
 
       final preferences = await SharedPreferences.getInstance();
       await preferences.remove(_preferenceKey);
-      if (kDebugMode) {
-        print('Cleared model download preference');
-      }
+      _loggingService.debug('Cleared model download preference');
     } catch (e) {
-      if (kDebugMode) {
-        print('Error clearing corrupted model: $e');
-      }
+      _loggingService.error('Error clearing corrupted model: $e');
     }
   }
 
@@ -126,7 +121,7 @@ class ModelDownloader {
 
     // File doesn't exist, check remote and compare
     try {
-      final accessToken = await Config.instance.getAccessToken();
+      final accessToken = await _config.getAccessToken();
       final Map<String, String> headers =
           accessToken != null && accessToken.isNotEmpty
           ? {'Authorization': 'Bearer $accessToken'}
@@ -153,9 +148,7 @@ class ModelDownloader {
         }
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error checking model existence: $e');
-      }
+      _loggingService.error('Error checking model existence: $e');
     }
 
     await preferences.setBool(_preferenceKey, false);
@@ -163,6 +156,7 @@ class ModelDownloader {
   }
 
   /// Downloads the model file and tracks progress with retry logic.
+  @override
   Future<void> downloadModel({
     required Function(double) onProgress,
     int maxRetries = 3,
@@ -192,9 +186,7 @@ class ModelDownloader {
       } catch (e) {
         lastException = e is Exception ? e : Exception(e.toString());
 
-        if (kDebugMode) {
-          print('Download attempt $attempts failed: $e');
-        }
+        _loggingService.error('Download attempt $attempts failed: $e');
 
         // Clear any partially downloaded file before retry
         await clearCorruptedModel();
@@ -228,7 +220,7 @@ class ModelDownloader {
 
       final request = http.Request('GET', Uri.parse(model.url));
 
-      final accessToken = await Config.instance.getAccessToken();
+      final accessToken = await _config.getAccessToken();
       if (accessToken != null && accessToken.isNotEmpty) {
         request.headers['Authorization'] = 'Bearer $accessToken';
       }
@@ -259,18 +251,6 @@ class ModelDownloader {
           onProgress(totalBytes > 0 ? received / totalBytes : 0.0);
         }
       } else {
-        if (kDebugMode) {
-          print(
-            'Failed to download model. Status code: ${response.statusCode}',
-          );
-          print('Headers: ${response.headers}');
-          try {
-            final errorBody = await response.stream.bytesToString();
-            print('Error body: $errorBody');
-          } catch (e) {
-            print('Could not read error body: $e');
-          }
-        }
         throw Exception(
           'Failed to download the model. Status: ${response.statusCode}',
         );

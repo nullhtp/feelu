@@ -13,8 +13,7 @@ class InitializationScreen extends StatefulWidget {
 }
 
 class _InitializationScreenState extends State<InitializationScreen> {
-  final InitializationService _initializationService =
-      InitializationService.instance;
+  final InitializationService _initializationService = InitializationService();
 
   List<ServiceInitializationState> _services = [];
   int _currentIndex = 0;
@@ -145,20 +144,35 @@ class _InitializationScreenState extends State<InitializationScreen> {
 
   Widget _buildCurrentState() {
     if (_services.isEmpty) {
-      return const CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-      );
+      return const CircularProgressIndicator(color: Colors.blue);
     }
 
-    if (!_isComplete) {
-      return CurrentServiceWidget(service: _services[_currentIndex]);
+    if (_isComplete) {
+      if (_hasErrors) {
+        // Find the first service with error
+        final errorService = _services.firstWhere(
+          (service) => service.isError,
+          orElse: () => _services[_currentIndex],
+        );
+        return ErrorStateWidget(
+          service: errorService,
+          onRetry: _retryInitialization,
+        );
+      } else {
+        return const SuccessStateWidget();
+      }
     } else if (_hasErrors) {
+      // Find the first service with error
+      final errorService = _services.firstWhere(
+        (service) => service.isError,
+        orElse: () => _services[_currentIndex],
+      );
       return ErrorStateWidget(
-        service: _services[_currentIndex],
+        service: errorService,
         onRetry: _retryInitialization,
       );
     } else {
-      return const SuccessStateWidget();
+      return CurrentServiceWidget(service: _services[_currentIndex]);
     }
   }
 }

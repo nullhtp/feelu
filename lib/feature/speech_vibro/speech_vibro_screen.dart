@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/di/service_locator.dart';
 import '../braille_input/braille_input_screen.dart';
 import 'speech_vibro_service.dart';
-import 'widgets/widgets.dart';
+import 'widgets/speech_vibro_gesture_detector.dart';
+import 'widgets/status_indicator_widget.dart';
 
 class SpeechVibroScreen extends StatefulWidget {
   const SpeechVibroScreen({super.key});
@@ -18,7 +20,7 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
-  final SpeechVibroService _speechVibroService = SpeechVibroService.instance;
+  late final SpeechVibroService _speechVibroService;
 
   SpeechVibroState _currentState = SpeechVibroState.ready;
 
@@ -28,6 +30,10 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
   @override
   void initState() {
     super.initState();
+
+    // Get service from DI container
+    _speechVibroService = ServiceLocator.get<SpeechVibroService>();
+
     _initializeAnimations();
     _initializeService();
     _subscribeToStreams();
@@ -35,10 +41,10 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
 
   void _initializeAnimations() {
     _pulseController = AnimationController(
-      duration: const Duration(seconds: 1),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    _pulseAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.2).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
   }
@@ -55,10 +61,6 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
         });
         _handleStateChange(state);
       }
-    });
-
-    _errorSubscription = _speechVibroService.errorStream.listen((error) {
-      _showError(error);
     });
   }
 

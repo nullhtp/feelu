@@ -1,13 +1,27 @@
 import 'package:vibration/vibration.dart';
 
-class VibrationNotificationService {
+abstract class IVibrationNotification {
+  Future<bool> isAvailable();
+  Future<void> vibrateCustom(int amplitude, int duration);
+  Future<void> vibrateError();
+  Future<void> vibrateWarning();
+  Future<void> vibrateNotification();
+  Future<void> vibratePattern({
+    required List<int> pattern,
+    int amplitude = 128,
+  });
+  Future<void> cancel();
+}
+
+class VibrationNotificationService implements IVibrationNotification {
   /// Check if vibration is available on device
-  static Future<bool> isAvailable() async {
+  @override
+  Future<bool> isAvailable() async {
     return await Vibration.hasVibrator();
   }
 
   /// Short vibration with low amplitude for first part of braille symbol
-  static Future<void> vibrateWarning() async {
+  Future<void> vibrateWarning() async {
     final hasVibrator = await isAvailable();
     if (!hasVibrator) return;
 
@@ -27,13 +41,13 @@ class VibrationNotificationService {
     }
   }
 
-  static Future<void> vibrateNotification() async {
+  Future<void> vibrateNotification() async {
     final hasVibrator = await isAvailable();
     if (!hasVibrator) return;
     await Vibration.vibrate(duration: 100);
   }
 
-  static Future<void> vibrateError() async {
+  Future<void> vibrateError() async {
     final hasVibrator = await isAvailable();
     if (!hasVibrator) return;
     await Vibration.vibrate(
@@ -43,7 +57,7 @@ class VibrationNotificationService {
   }
 
   /// Custom vibration with amplitude and duration
-  static Future<void> vibrateCustom(int amplitude, int duration) async {
+  Future<void> vibrateCustom(int amplitude, int duration) async {
     final hasVibrator = await isAvailable();
     if (!hasVibrator) return;
     final hasCustomVibrator = await Vibration.hasCustomVibrationsSupport();
@@ -55,12 +69,12 @@ class VibrationNotificationService {
   }
 
   /// Stop any ongoing vibration
-  static Future<void> cancel() async {
+  Future<void> cancel() async {
     await Vibration.cancel();
   }
 
   /// Flexible vibration pattern function
-  static Future<void> vibratePattern({
+  Future<void> vibratePattern({
     required List<int> pattern,
     int amplitude = 128,
   }) async {

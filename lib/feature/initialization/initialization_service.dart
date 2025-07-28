@@ -1,23 +1,24 @@
 import 'dart:async';
 
-import '../../core/camera_service.dart';
-import '../../core/gemma_service.dart';
-import '../../core/speech_recognition_service.dart';
-import '../../core/vibration_notification_service.dart';
-import '../../outputs/tts.dart';
+import '../../core/di/service_locator.dart';
+import '../../core/services/services.dart';
 import 'models/service_initialization_state.dart';
 
 class InitializationService {
-  static final InitializationService _instance = InitializationService._();
-  static InitializationService get instance => _instance;
-  InitializationService._();
-
   final StreamController<List<ServiceInitializationState>> _servicesController =
       StreamController<List<ServiceInitializationState>>.broadcast();
   final StreamController<int> _currentIndexController =
       StreamController<int>.broadcast();
   final StreamController<bool> _completionController =
       StreamController<bool>.broadcast();
+
+  final IVibrationNotification _vibrationNotificationService =
+      ServiceLocator.get<IVibrationNotification>();
+  final ICameraService _cameraService = ServiceLocator.get<ICameraService>();
+  final ITtsService _ttsService = ServiceLocator.get<ITtsService>();
+  final ISpeechRecognitionService _speechRecognitionService =
+      ServiceLocator.get<ISpeechRecognitionService>();
+  final IAiModelService _aiModelService = ServiceLocator.get<IAiModelService>();
 
   Stream<List<ServiceInitializationState>> get servicesStream =>
       _servicesController.stream;
@@ -116,7 +117,7 @@ class InitializationService {
 
   Future<bool> _initializeVibrationService(int index) async {
     try {
-      final isAvailable = await VibrationNotificationService.isAvailable();
+      final isAvailable = await _vibrationNotificationService.isAvailable();
 
       if (isAvailable) {
         _updateServiceStatus(index, ServiceStatus.success);
@@ -141,8 +142,7 @@ class InitializationService {
 
   Future<bool> _initializeCameraService(int index) async {
     try {
-      final cameraService = CameraService.instance;
-      final success = await cameraService.initialize();
+      final success = await _cameraService.initialize();
 
       if (success) {
         _updateServiceStatus(index, ServiceStatus.success);
@@ -167,8 +167,7 @@ class InitializationService {
 
   Future<bool> _initializeTtsService(int index) async {
     try {
-      final ttsService = TtsService.instance;
-      final success = await ttsService.initialize();
+      final success = await _ttsService.initialize();
 
       if (success) {
         _updateServiceStatus(index, ServiceStatus.success);
@@ -193,10 +192,9 @@ class InitializationService {
 
   Future<bool> _initializeSpeechRecognitionService(int index) async {
     try {
-      final speechService = SpeechRecognitionService.instance;
-      await speechService.initialize();
+      await _speechRecognitionService.initialize();
 
-      if (speechService.isInitialized) {
+      if (_speechRecognitionService.isInitialized) {
         _updateServiceDescription(index, 'Speech recognition ready');
         _updateServiceStatus(index, ServiceStatus.success);
         return true;
@@ -220,38 +218,35 @@ class InitializationService {
 
   Future<bool> _initializeGemmaService(int index) async {
     try {
-      final gemmaService = GemmaService.instance;
-
       // Listen to progress and loading messages
-      final progressSubscription = gemmaService.downloadProgressStream.listen((
-        progress,
-      ) {
-        if (progress != null) {
-          _updateServiceProgress(index, progress);
-        }
-      });
+      final progressSubscription = _aiModelService.downloadProgressStream
+          .listen((progress) {
+            if (progress != null) {
+              _updateServiceProgress(index, progress);
+            }
+          });
 
-      final messageSubscription = gemmaService.loadingMessageStream.listen((
+      final messageSubscription = _aiModelService.loadingMessageStream.listen((
         message,
       ) {
         _updateServiceDescription(index, message);
       });
 
-      await gemmaService.initialize();
+      await _aiModelService.initialize();
 
       // Cancel subscriptions
       await progressSubscription.cancel();
       await messageSubscription.cancel();
 
-      if (gemmaService.isInitialized) {
+      if (_aiModelService.isInitialized) {
         _updateServiceDescription(index, 'AI model ready');
         _updateServiceStatus(index, ServiceStatus.success);
         return true;
       } else {
         _updateServiceError(
           index,
-          gemmaService.errorMessage ?? 'Unknown error',
-          _getGemmaFixInstructions(gemmaService.errorMessage),
+          _aiModelService.errorMessage ?? 'Unknown error',
+          _getGemmaFixInstructions(_aiModelService.errorMessage),
         );
         return false;
       }

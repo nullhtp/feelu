@@ -1,17 +1,17 @@
 import 'dart:async';
 
-import 'package:feelu/core/braille_vibration.dart';
-import 'package:feelu/core/interfaces.dart';
-import 'package:feelu/core/vibration_notification_service.dart';
-import 'package:feelu/outputs/braille_text_output.dart';
-import 'package:feelu/outputs/tts.dart';
-import 'package:feelu/transformers/llm_assistant.dart';
-import 'package:feelu/transformers/llm_decode.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-import '../photo_vibro/photo_vibro_screen.dart';
-import '../speech_vibro/speech_vibro_screen.dart';
+import '../../core/di/service_locator.dart';
+import '../../core/interfaces.dart';
+import '../../core/services/services.dart';
+import '../../feature/braille_fullscreen/braille_fullscreen_screen.dart';
+import '../../feature/photo_vibro/photo_vibro_screen.dart';
+import '../../feature/speech_vibro/speech_vibro_screen.dart';
+import '../../outputs/braille_text_output.dart';
+import '../../outputs/tts_output.dart';
+import '../../transformers/llm_assistant.dart';
+import '../../transformers/llm_decode.dart';
 import 'braille_service.dart';
 import 'widgets/braille_piano_widget.dart';
 
@@ -23,66 +23,98 @@ class BrailleInputScreen extends StatefulWidget {
 }
 
 class _BrailleInputScreenState extends State<BrailleInputScreen> {
-  late BrailleService _brailleService;
+  late final BrailleService _brailleService;
+  late BrailleTextOutputService _brailleTextOutputService;
+
+  final IBrailleVibrationService _brailleVibrationService =
+      ServiceLocator.get<IBrailleVibrationService>();
+  final IVibrationNotification _vibrationNotificationService =
+      ServiceLocator.get<IVibrationNotification>();
+  final ILlmDecodeService _llmDecodeService =
+      ServiceLocator.get<ILlmDecodeService>();
+  final ILlmAssistantService _llmAssistantService =
+      ServiceLocator.get<ILlmAssistantService>();
+  final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
+
   String _displayText = '';
   bool _isSpeaking = false; // Add flag to prevent multiple speak calls
 
-  late BrailleTextOutputService _brailleTextOutputService;
-
-  final Pipeline _outputPipeline = Pipeline(
-    transformable: LlmDecodeService.instance,
-    outputable: TtsService.instance,
-  );
-
+  late Pipeline _outputPipeline;
   late Pipeline _assistantPipeline;
 
   @override
   void initState() {
     super.initState();
-    _brailleService = BrailleService();
-    _outputPipeline.initialize();
+
+    // Get services from DI container
+    _brailleService =
+        BrailleService(); // This one doesn't use singleton pattern yet
+
+    // BrailleTextOutputService needs context
     _brailleTextOutputService = BrailleTextOutputService(context: context);
+
+    // Initialize pipelines with DI services
+    _outputPipeline = Pipeline(
+      transformable: _llmDecodeService,
+      outputable: TtsOutputService(),
+    );
+
     _assistantPipeline = Pipeline(
-      transformable: LlmAssistantService.instance,
+      transformable: _llmAssistantService,
       outputable: _brailleTextOutputService,
     );
 
+    _outputPipeline.initialize();
     _assistantPipeline.initialize();
 
-    // Notify user they've entered braille input mode with dot-like pattern
-    BrailleVibrationService.instance.vibrateBraille('i');
-  }
-
-  void _onTextGenerated(String text) {
-    setState(() {
-      _displayText = text;
+    // Setup stream listener for braille text output
+    _brailleTextOutputService.fullscreenStream.listen((brailleText) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => BrailleFullscreenScreen(
+            sourceText: brailleText,
+            sourceTitle: 'ASSISTANT OUTPUT',
+            themeColor: Colors.green.withValues(alpha: 0.3),
+            brailleVibrationService: _brailleVibrationService,
+          ),
+        ),
+      );
     });
   }
 
-  void _backspace() {
+  void _handleBrailleSymbol(String brailleCode) {
     setState(() {
-      _brailleService.backspace();
-      _displayText = _brailleService.getDisplayText();
+      _displayText = brailleCode;
     });
+    _vibrationNotificationService.vibrateNotification();
   }
 
-  void _clearAllText() {
+  void _handleBackspace() {
+    if (_displayText.isNotEmpty) {
+      setState(() {
+        _displayText = _displayText.substring(0, _displayText.length - 1);
+      });
+      _vibrationNotificationService.vibrateWarning();
+    }
+  }
+
+  void _handleClearAll() {
     setState(() {
-      _brailleService.clearOutput();
-      _displayText = _brailleService.getDisplayText();
+      _displayText = '';
     });
+    _vibrationNotificationService.vibrateWarning();
   }
 
   Future<void> _speakText() async {
     final textToSpeak = _displayText.trim();
     if (textToSpeak.isEmpty) {
       // Speak a message indicating no text
-      VibrationNotificationService.vibrateWarning();
+      _vibrationNotificationService.vibrateWarning();
     } else {
       // Speak the inputted text
-      VibrationNotificationService.vibrateNotification();
+      _vibrationNotificationService.vibrateNotification();
       await _outputPipeline.process(textToSpeak);
-      VibrationNotificationService.vibrateNotification();
+      _vibrationNotificationService.vibrateNotification();
     }
   }
 
@@ -90,12 +122,12 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
     final textToSpeak = _displayText.trim();
     if (textToSpeak.isEmpty) {
       // Speak a message indicating no text
-      VibrationNotificationService.vibrateWarning();
+      _vibrationNotificationService.vibrateWarning();
     } else {
       // Speak the inputted text
-      VibrationNotificationService.vibrateNotification();
+      _vibrationNotificationService.vibrateNotification();
       await _assistantPipeline.process(textToSpeak);
-      VibrationNotificationService.vibrateNotification();
+      _vibrationNotificationService.vibrateNotification();
     }
   }
 
@@ -118,7 +150,7 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
                 _isSpeaking = true;
                 await _speakText();
               } catch (e) {
-                print(e);
+                _loggingService.error('Error speaking text: $e');
               } finally {
                 _isSpeaking = false;
               }
@@ -128,7 +160,7 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
                 _isSpeaking = true;
                 await _askAssistant();
               } catch (e) {
-                print(e);
+                _loggingService.error('Error asking assistant: $e');
               } finally {
                 _isSpeaking = false;
               }
@@ -158,13 +190,11 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
                 child: GestureDetector(
                   onTap: () {
                     // Delete functionality - tap anywhere in text area to delete
-                    HapticFeedback.mediumImpact();
-                    _backspace();
+                    _handleBackspace();
                   },
                   onLongPress: () {
                     // Clear all text - long press anywhere in text area
-                    HapticFeedback.heavyImpact();
-                    _clearAllText();
+                    _handleClearAll();
                   },
                   child: Container(
                     margin: const EdgeInsets.all(8),
@@ -259,7 +289,7 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
                   margin: const EdgeInsets.all(8),
                   child: BraillePianoWidget(
                     brailleService: _brailleService,
-                    onTextGenerated: _onTextGenerated,
+                    onTextGenerated: _handleBrailleSymbol,
                   ),
                 ),
               ),

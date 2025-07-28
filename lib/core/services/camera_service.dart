@@ -3,13 +3,19 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 
+import '../di/service_locator.dart';
+import 'logging_service.dart';
 import 'vibration_notification_service.dart';
 
-class CameraService {
-  static CameraService? _instance;
-  static CameraService get instance => _instance ??= CameraService._();
-  CameraService._();
+abstract class ICameraService {
+  Future<bool> initialize();
+  Future<void> dispose();
+  Future<Uint8List?> captureImage();
+  Future<bool> switchCamera();
+  String getCameraInfo();
+}
 
+class CameraService implements ICameraService {
   CameraController? _cameraController;
   List<CameraDescription> _cameras = [];
   bool _isInitialized = false;
@@ -19,6 +25,11 @@ class CameraService {
       StreamController<bool>.broadcast();
   final StreamController<String> _errorController =
       StreamController<String>.broadcast();
+
+  final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
+
+  final IVibrationNotification _vibrationNotificationService =
+      ServiceLocator.get<IVibrationNotification>();
 
   // Stream getters
   Stream<bool> get initializationStream => _initializationController.stream;
@@ -32,11 +43,10 @@ class CameraService {
   List<CameraDescription> get cameras => _cameras;
 
   /// Initialize the camera service - finds available cameras and sets up rear camera
+  @override
   Future<bool> initialize() async {
     try {
-      if (kDebugMode) {
-        print('CameraService: Starting initialization...');
-      }
+      _loggingService.debug('CameraService: Starting initialization...');
 
       // Get available cameras
       _cameras = await availableCameras();
@@ -45,9 +55,7 @@ class CameraService {
         throw Exception('No cameras available on this device');
       }
 
-      if (kDebugMode) {
-        print('CameraService: Found ${_cameras.length} cameras');
-      }
+      _loggingService.debug('CameraService: Found ${_cameras.length} cameras');
 
       // Find rear camera (back camera)
       final rearCamera = _cameras.firstWhere(
@@ -55,9 +63,7 @@ class CameraService {
         orElse: () => _cameras.first,
       );
 
-      if (kDebugMode) {
-        print('CameraService: Using camera: ${rearCamera.name}');
-      }
+      _loggingService.debug('CameraService: Using camera: ${rearCamera.name}');
 
       // Initialize camera controller
       _cameraController = CameraController(
@@ -71,16 +77,14 @@ class CameraService {
       _isInitialized = true;
       _initializationController.add(true);
 
-      if (kDebugMode) {
-        print('CameraService: Initialization completed successfully');
-      }
+      _loggingService.debug(
+        'CameraService: Initialization completed successfully',
+      );
 
       return true;
     } catch (e) {
       final errorMsg = 'Failed to initialize camera: ${e.toString()}';
-      if (kDebugMode) {
-        print('CameraService: $errorMsg');
-      }
+      _loggingService.error(errorMsg);
       _errorController.add(errorMsg);
       _initializationController.add(false);
       return false;
@@ -88,6 +92,7 @@ class CameraService {
   }
 
   /// Capture an image and return the bytes
+  @override
   Future<Uint8List?> captureImage() async {
     if (!isCameraReady) {
       throw Exception('Camera is not initialized or ready');
@@ -95,35 +100,32 @@ class CameraService {
 
     try {
       // Provide haptic feedback for capture
-      VibrationNotificationService.vibrateNotification();
+      _vibrationNotificationService.vibrateNotification();
 
       final XFile image = await _cameraController!.takePicture();
       final Uint8List imageBytes = await image.readAsBytes();
 
-      if (kDebugMode) {
-        print(
-          'CameraService: Image captured successfully (${imageBytes.length} bytes)',
-        );
-      }
+      _loggingService.debug(
+        'CameraService: Image captured successfully (${imageBytes.length} bytes)',
+      );
 
       return imageBytes;
     } catch (e) {
       final errorMsg = 'Failed to capture image: ${e.toString()}';
-      if (kDebugMode) {
-        print('CameraService: $errorMsg');
-      }
+      _loggingService.error(errorMsg);
       _errorController.add(errorMsg);
-      VibrationNotificationService.vibrateError();
+      _vibrationNotificationService.vibrateError();
       rethrow;
     }
   }
 
   /// Switch to a different camera (front/back)
+  @override
   Future<bool> switchCamera() async {
     if (_cameras.length <= 1) {
-      if (kDebugMode) {
-        print('CameraService: Only one camera available, cannot switch');
-      }
+      _loggingService.error(
+        'CameraService: Only one camera available, cannot switch',
+      );
       return false;
     }
 
@@ -148,22 +150,21 @@ class CameraService {
 
       await _cameraController!.initialize();
 
-      if (kDebugMode) {
-        print('CameraService: Switched to camera: ${newCamera.name}');
-      }
+      _loggingService.debug(
+        'CameraService: Switched to camera: ${newCamera.name}',
+      );
 
       return true;
     } catch (e) {
       final errorMsg = 'Failed to switch camera: ${e.toString()}';
-      if (kDebugMode) {
-        print('CameraService: $errorMsg');
-      }
+      _loggingService.error(errorMsg);
       _errorController.add(errorMsg);
       return false;
     }
   }
 
   /// Get camera info for debugging
+  @override
   String getCameraInfo() {
     if (!_isInitialized) {
       return 'Camera service not initialized';
@@ -184,6 +185,7 @@ class CameraService {
   }
 
   /// Dispose of camera resources
+  @override
   Future<void> dispose() async {
     try {
       await _cameraController?.dispose();
@@ -193,13 +195,9 @@ class CameraService {
       await _initializationController.close();
       await _errorController.close();
 
-      if (kDebugMode) {
-        print('CameraService: Disposed successfully');
-      }
+      _loggingService.debug('CameraService: Disposed successfully');
     } catch (e) {
-      if (kDebugMode) {
-        print('CameraService: Error during disposal: $e');
-      }
+      _loggingService.error('CameraService: Error during disposal: $e');
     }
   }
 }

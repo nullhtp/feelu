@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 
 import '../../core/domain/braille_code_map.dart';
-import '../../core/vibration_notification_service.dart';
-import '../../feature/braille_input/braille_symbol.dart';
+import '../../core/domain/braille_symbol.dart';
+import '../../core/services/services.dart';
 import 'widgets/braille_text_widget.dart';
 
 class BrailleFullscreenScreen extends StatefulWidget {
   final String sourceText;
   final String sourceTitle;
   final Color themeColor;
+  final IBrailleVibrationService brailleVibrationService;
 
   BrailleFullscreenScreen({
     super.key,
     required this.sourceText,
     this.sourceTitle = 'BRAILLE OUTPUT',
     this.themeColor = Colors.white30,
+    required this.brailleVibrationService,
   });
 
   @override
@@ -57,20 +59,13 @@ class _BrailleFullscreenScreenState extends State<BrailleFullscreenScreen> {
     }
 
     // Provide entrance notification
-    VibrationNotificationService.vibratePattern(
-      pattern: [150, 100, 150, 100, 300],
-      amplitude: 150,
-    );
+    widget.brailleVibrationService.vibrateBraille('o');
 
     // Announce screen entry
     await Future.delayed(const Duration(milliseconds: 500));
   }
 
   void _navigateBack() {
-    VibrationNotificationService.vibratePattern(
-      pattern: [100, 50, 100],
-      amplitude: 100,
-    );
     Navigator.of(context).pop();
   }
 
@@ -156,6 +151,7 @@ class _BrailleFullscreenScreenState extends State<BrailleFullscreenScreen> {
         symbolSize: 40.0, // Larger for better touch accessibility
         spacing: 16.0, // More spacing for easier navigation
         symbols: _brailleSymbols,
+        brailleVibrationService: widget.brailleVibrationService,
       ),
     );
   }

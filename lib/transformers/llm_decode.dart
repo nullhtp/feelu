@@ -1,15 +1,14 @@
 import 'package:flutter_gemma/flutter_gemma.dart';
 
-import '../core/gemma_service.dart';
+import '../core/di/service_locator.dart';
 import '../core/interfaces.dart';
+import '../core/services/ai_model_service.dart';
+
+abstract class ILlmDecodeService implements Transformable {}
 
 /// Service class that handles all Gemma AI model operations
-class LlmDecodeService implements Transformable {
-  static LlmDecodeService? _instance;
-  static LlmDecodeService get instance => _instance ??= LlmDecodeService._();
-
-  LlmDecodeService._();
-
+class LlmDecodeService implements ILlmDecodeService {
+  final IAiModelService _aiModelService = ServiceLocator.get<IAiModelService>();
   @override
   Future<void> dispose() async {}
 
@@ -25,7 +24,7 @@ class LlmDecodeService implements Transformable {
     if (text.isEmpty) {
       return '';
     }
-    final session = await GemmaService.instance.createSession();
+    final session = await _aiModelService.createSession();
 
     try {
       // Create and send the user's message

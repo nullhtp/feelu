@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:feelu/core/braille_vibration.dart';
+import 'package:feelu/core/di/service_locator.dart';
 import 'package:feelu/core/interfaces.dart';
-import 'package:feelu/core/speech_recognition_service.dart';
-import 'package:feelu/core/vibration_notification_service.dart';
+import 'package:feelu/core/services/services.dart';
 import 'package:feelu/outputs/braille_text_output.dart';
 import 'package:feelu/transformers/llm_summarization.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +14,11 @@ class SpeechVibroService {
   static SpeechVibroService get instance => _instance;
   SpeechVibroService._internal();
 
-  final SpeechRecognitionService _speechRecognitionService =
-      SpeechRecognitionService.instance;
+  final ISpeechRecognitionService _speechRecognitionService =
+      ServiceLocator.get<ISpeechRecognitionService>();
+  final IVibrationNotification _vibrationNotificationService =
+      ServiceLocator.get<IVibrationNotification>();
+  final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
   late BrailleTextOutputService _brailleTextService;
 
   late Pipeline _summarizationPipeline;
@@ -25,12 +27,9 @@ class SpeechVibroService {
       StreamController<String>.broadcast();
   final StreamController<SpeechVibroState> _stateController =
       StreamController<SpeechVibroState>.broadcast();
-  final StreamController<String> _errorController =
-      StreamController<String>.broadcast();
 
   Stream<String> get summarizedTextStream => _summarizedTextController.stream;
   Stream<SpeechVibroState> get stateStream => _stateController.stream;
-  Stream<String> get errorStream => _errorController.stream;
 
   SpeechVibroState _currentState = SpeechVibroState.ready;
   String _lastMessage = '';
@@ -39,24 +38,24 @@ class SpeechVibroService {
   SpeechVibroState get currentState => _currentState;
   String get lastMessage => _lastMessage;
   BrailleTextOutputService get brailleTextService => _brailleTextService;
+  ILlmSummarizationService get llmSummarizationService =>
+      ServiceLocator.get<ILlmSummarizationService>();
 
   Future<void> initialize(BuildContext context) async {
     try {
       await _speechRecognitionService.initialize();
       _brailleTextService = BrailleTextOutputService(context: context);
       _summarizationPipeline = Pipeline(
-        transformable: LlmSummarizationService.instance,
+        transformable: llmSummarizationService,
         outputable: _brailleTextService,
       );
       _subscribeToTransformedData();
 
       await _summarizationPipeline.initialize();
 
-      BrailleVibrationService.instance.vibrateBraille('s');
+      ServiceLocator.get<BrailleVibrationService>().vibrateBraille('s');
     } catch (e) {
-      if (!_errorController.isClosed) {
-        _errorController.add('Failed to initialize services: ${e.toString()}');
-      }
+      _loggingService.error('Failed to initialize services: ${e.toString()}');
       throw e;
     }
   }
@@ -72,13 +71,7 @@ class SpeechVibroService {
           },
           onError: (error) {
             final errorMessage = 'Error processing text: ${error.toString()}';
-            if (!_summarizedTextController.isClosed) {
-              _summarizedTextController.add(errorMessage);
-            }
-            if (!_errorController.isClosed) {
-              _errorController.add(errorMessage);
-            }
-            VibrationNotificationService.vibrateError();
+            _loggingService.error(errorMessage);
           },
         );
   }
@@ -91,7 +84,7 @@ class SpeechVibroService {
       _summarizedTextController.add('');
     }
 
-    VibrationNotificationService.vibrateNotification();
+    _vibrationNotificationService.vibrateNotification();
 
     try {
       final recognizedText = await _speechRecognitionService.startListening();
@@ -101,16 +94,11 @@ class SpeechVibroService {
       if (recognizedText.isNotEmpty) {
         await _processRecognizedText(recognizedText);
       } else {
-        VibrationNotificationService.vibrateWarning();
+        _vibrationNotificationService.vibrateWarning();
       }
     } catch (e) {
       _updateState(SpeechVibroState.ready);
-      VibrationNotificationService.vibrateWarning();
-      if (!_errorController.isClosed) {
-        _errorController.add(
-          'Error during speech recognition: ${e.toString()}',
-        );
-      }
+      _loggingService.error('Error during speech recognition: ${e.toString()}');
     }
   }
 
@@ -119,19 +107,18 @@ class SpeechVibroService {
 
     try {
       await _summarizationPipeline.process(text);
-      VibrationNotificationService.vibrateNotification();
+      _vibrationNotificationService.vibrateNotification();
     } catch (e) {
-      VibrationNotificationService.vibrateError();
-      if (!_errorController.isClosed) {
-        _errorController.add('Error processing text: ${e.toString()}');
-      }
+      _loggingService.error(
+        'Error processing recognized text: ${e.toString()}',
+      );
     } finally {
       _updateState(SpeechVibroState.ready);
     }
   }
 
   Future<void> forceListen() async {
-    VibrationNotificationService.vibrateNotification();
+    _vibrationNotificationService.vibrateNotification();
     await startListening();
   }
 
@@ -148,6 +135,5 @@ class SpeechVibroService {
     _transformedDataSubscription?.cancel();
     _summarizedTextController.close();
     _stateController.close();
-    _errorController.close();
   }
 }

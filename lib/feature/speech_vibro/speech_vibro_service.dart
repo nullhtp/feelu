@@ -57,7 +57,9 @@ class SpeechVibroService {
         amplitude: 100,
       );
     } catch (e) {
-      _errorController.add('Failed to initialize services: ${e.toString()}');
+      if (!_errorController.isClosed) {
+        _errorController.add('Failed to initialize services: ${e.toString()}');
+      }
       throw e;
     }
   }
@@ -67,12 +69,18 @@ class SpeechVibroService {
         .listen(
           (transformedData) {
             _lastMessage = transformedData;
-            _summarizedTextController.add(transformedData);
+            if (!_summarizedTextController.isClosed) {
+              _summarizedTextController.add(transformedData);
+            }
           },
           onError: (error) {
             final errorMessage = 'Error processing text: ${error.toString()}';
-            _summarizedTextController.add(errorMessage);
-            _errorController.add(errorMessage);
+            if (!_summarizedTextController.isClosed) {
+              _summarizedTextController.add(errorMessage);
+            }
+            if (!_errorController.isClosed) {
+              _errorController.add(errorMessage);
+            }
             VibrationNotificationService.vibrateError();
           },
         );
@@ -82,7 +90,9 @@ class SpeechVibroService {
     if (_currentState != SpeechVibroState.ready) return;
 
     _updateState(SpeechVibroState.listening);
-    _summarizedTextController.add('');
+    if (!_summarizedTextController.isClosed) {
+      _summarizedTextController.add('');
+    }
 
     VibrationNotificationService.vibrateNotification();
 
@@ -99,7 +109,11 @@ class SpeechVibroService {
     } catch (e) {
       _updateState(SpeechVibroState.ready);
       VibrationNotificationService.vibrateWarning();
-      _errorController.add('Error during speech recognition: ${e.toString()}');
+      if (!_errorController.isClosed) {
+        _errorController.add(
+          'Error during speech recognition: ${e.toString()}',
+        );
+      }
     }
   }
 
@@ -111,7 +125,9 @@ class SpeechVibroService {
       VibrationNotificationService.vibrateNotification();
     } catch (e) {
       VibrationNotificationService.vibrateError();
-      _errorController.add('Error processing text: ${e.toString()}');
+      if (!_errorController.isClosed) {
+        _errorController.add('Error processing text: ${e.toString()}');
+      }
     } finally {
       _updateState(SpeechVibroState.ready);
     }
@@ -124,7 +140,9 @@ class SpeechVibroService {
 
   void _updateState(SpeechVibroState newState) {
     _currentState = newState;
-    _stateController.add(newState);
+    if (!_stateController.isClosed) {
+      _stateController.add(newState);
+    }
   }
 
   void dispose() {

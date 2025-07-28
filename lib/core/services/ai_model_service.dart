@@ -47,19 +47,27 @@ class GemmaService implements IAiModelService {
   final _canRetryController = StreamController<bool>.broadcast();
 
   // Stream getters
+  @override
   Stream<bool> get modelLoadingStream => _modelLoadingController.stream;
+  @override
   Stream<String> get loadingMessageStream => _loadingMessageController.stream;
+  @override
   Stream<double?> get downloadProgressStream =>
       _downloadProgressController.stream;
+  @override
   Stream<String?> get errorMessageStream => _errorMessageController.stream;
+  @override
   Stream<bool> get canRetryStream => _canRetryController.stream;
 
   // Getters for current state
   bool get isModelLoading => _isModelLoading;
   String get loadingMessage => _loadingMessage;
   double? get downloadProgress => _downloadProgress;
+  @override
   String? get errorMessage => _errorMessage;
   bool get canRetry => _canRetry;
+
+  @override
   bool get isInitialized => _inferenceModel != null;
 
   /// Initialize the Gemma service

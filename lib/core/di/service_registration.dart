@@ -1,3 +1,7 @@
+import '../../feature/braille_input/braille_service.dart';
+import '../../feature/initialization/initialization_service.dart';
+import '../../feature/photo_vibro/photo_vibro_service.dart';
+import '../../feature/speech_vibro/speech_vibro_service.dart';
 import '../../transformers/transformers.dart';
 import '../config/app_config.dart';
 import '../services/services.dart';
@@ -60,6 +64,21 @@ class ServiceRegistration {
     );
     ServiceLocator.registerLazySingleton<ILlmSummarizationService>(
       () => LlmSummarizationService(),
+    );
+  }
+
+  static Future<void> registerFeatureServices() async {
+    ServiceLocator.registerLazySingleton<IBrailleService>(
+      () => BrailleService(),
+    );
+    ServiceLocator.registerLazySingleton<IPhotoVibroService>(
+      () => PhotoVibroService(),
+    );
+    ServiceLocator.registerLazySingleton<ISpeechVibroService>(
+      () => SpeechVibroService(),
+    );
+    ServiceLocator.registerLazySingleton<IInitializationService>(
+      () => InitializationService(),
     );
   }
 

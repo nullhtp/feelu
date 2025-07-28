@@ -1,10 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:vibration/vibration.dart';
 
-import '../di/service_locator.dart';
 import '../domain/braille_code_map.dart';
-import 'vibration_notification_service.dart';
 
 abstract class IBrailleVibrationService {
   Future<void> vibrateBraille(String data);
@@ -12,9 +11,7 @@ abstract class IBrailleVibrationService {
 
 /// Braille Output Service: Converts text to braille and vibrates each symbol
 class BrailleVibrationService implements IBrailleVibrationService {
-  final IVibrationNotification _vibrationNotificationService =
-      ServiceLocator.get<IVibrationNotification>();
-
+  @override
   Future<void> vibrateBraille(String data) async {
     for (final char in data.toLowerCase().split('')) {
       final braille = charToBraille[char] ?? '000000';
@@ -58,11 +55,8 @@ class BrailleVibrationService implements IBrailleVibrationService {
     if (pattern == null) {
       return;
     }
-    // Use VibrationNotificationService for custom vibration
-    await _vibrationNotificationService.vibrateCustom(
-      pattern.first,
-      pattern.last,
-    );
+
+    await Vibration.vibrate(duration: pattern.first, amplitude: pattern.last);
     await Future.delayed(const Duration(milliseconds: 500));
   }
 }

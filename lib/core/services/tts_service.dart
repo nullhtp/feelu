@@ -10,7 +10,6 @@ abstract class ITtsService {
   Future<void> dispose();
   Future<void> speak(String text);
   Future<void> stop();
-  Future<void> pause();
 }
 
 /// Text-to-Speech service for offline speech synthesis
@@ -21,9 +20,6 @@ class TtsService implements ITtsService {
   bool _isSpeaking = false;
 
   // TTS Configuration
-  double _volume = 1.0;
-  double _pitch = 1.0;
-  double _speechRate = 0.5;
   String? _selectedLanguage;
   String? _selectedEngine;
   List<dynamic> _languages = [];
@@ -32,15 +28,13 @@ class TtsService implements ITtsService {
   // Getters
   bool get isInitialized => _isInitialized;
   bool get isSpeaking => _isSpeaking;
-  double get volume => _volume;
-  double get pitch => _pitch;
-  double get speechRate => _speechRate;
   String? get selectedLanguage => _selectedLanguage;
   String? get selectedEngine => _selectedEngine;
   List<dynamic> get availableLanguages => _languages;
   List<dynamic> get availableEngines => _engines;
 
   /// Initialize the TTS service
+  @override
   Future<bool> initialize() async {
     try {
       // Initialize TTS
@@ -138,15 +132,16 @@ class TtsService implements ITtsService {
       }
 
       // Set default voice parameters
-      await _flutterTts.setVolume(_volume);
-      await _flutterTts.setPitch(_pitch);
-      await _flutterTts.setSpeechRate(_speechRate);
+      await _flutterTts.setVolume(1);
+      await _flutterTts.setPitch(1);
+      await _flutterTts.setSpeechRate(0.5);
     } catch (e) {
       _loggingService.error("Error setting default configuration: $e");
     }
   }
 
   /// Speak the given text
+  @override
   Future<bool> speak(String text) async {
     if (!_isInitialized) {
       _loggingService.error("TTS not initialized");
@@ -172,123 +167,13 @@ class TtsService implements ITtsService {
   }
 
   /// Stop speaking
+  @override
   Future<void> stop() async {
     try {
       await _flutterTts.stop();
       _isSpeaking = false;
     } catch (e) {
       _loggingService.error("Error stopping speech: $e");
-    }
-  }
-
-  /// Pause speaking
-  Future<void> pause() async {
-    try {
-      await _flutterTts.pause();
-    } catch (e) {
-      _loggingService.error("Error pausing speech: $e");
-    }
-  }
-
-  /// Set volume (0.0 to 1.0)
-  Future<void> setVolume(double volume) async {
-    try {
-      _volume = volume.clamp(0.0, 1.0);
-      await _flutterTts.setVolume(_volume);
-    } catch (e) {
-      _loggingService.error("Error setting volume: $e");
-    }
-  }
-
-  /// Set pitch (0.5 to 2.0)
-  Future<void> setPitch(double pitch) async {
-    try {
-      _pitch = pitch.clamp(0.5, 2.0);
-      await _flutterTts.setPitch(_pitch);
-    } catch (e) {
-      _loggingService.error("Error setting pitch: $e");
-    }
-  }
-
-  /// Set speech rate (0.0 to 1.0)
-  Future<void> setSpeechRate(double rate) async {
-    try {
-      _speechRate = rate.clamp(0.0, 1.0);
-      await _flutterTts.setSpeechRate(_speechRate);
-    } catch (e) {
-      _loggingService.error("Error setting speech rate: $e");
-    }
-  }
-
-  /// Set language
-  Future<bool> setLanguage(String language) async {
-    try {
-      if (_languages.contains(language)) {
-        await _flutterTts.setLanguage(language);
-        _selectedLanguage = language;
-        return true;
-      } else {
-        _loggingService.error("Language not supported: $language");
-        return false;
-      }
-    } catch (e) {
-      _loggingService.error("Error setting language: $e");
-      return false;
-    }
-  }
-
-  /// Set TTS engine (Android only)
-  Future<bool> setEngine(String engine) async {
-    if (!Platform.isAndroid) {
-      _loggingService.error("Engine selection only available on Android");
-      return false;
-    }
-
-    try {
-      if (_engines.contains(engine)) {
-        await _flutterTts.setEngine(engine);
-        _selectedEngine = engine;
-        return true;
-      } else {
-        _loggingService.error("Engine not available: $engine");
-        return false;
-      }
-    } catch (e) {
-      _loggingService.error("Error setting engine: $e");
-      return false;
-    }
-  }
-
-  /// Check if TTS is available on the device
-  Future<bool> isLanguageAvailable(String language) async {
-    try {
-      final result = await _flutterTts.isLanguageAvailable(language);
-      return result;
-    } catch (e) {
-      _loggingService.error("Error checking language availability: $e");
-      return false;
-    }
-  }
-
-  /// Get voices for the current language
-  Future<List<dynamic>> getVoices() async {
-    try {
-      final voices = await _flutterTts.getVoices;
-      return voices;
-    } catch (e) {
-      _loggingService.error("Error getting voices: $e");
-      return [];
-    }
-  }
-
-  /// Set voice by name
-  Future<bool> setVoice(Map<String, String> voice) async {
-    try {
-      await _flutterTts.setVoice(voice);
-      return true;
-    } catch (e) {
-      _loggingService.error("Error setting voice: $e");
-      return false;
     }
   }
 

@@ -4,7 +4,14 @@ import 'package:flutter/services.dart';
 import '../../core/di/service_locator.dart';
 import '../../core/services/services.dart';
 
-class BrailleService {
+abstract class IBrailleService {
+  void processKeyInput(bool key1, bool key2, bool key3);
+  void backspace();
+  void clearOutput();
+  String getDisplayText();
+}
+
+class BrailleService implements IBrailleService {
   String currentInput = '';
   String firstHalf = '';
   String secondHalf = '';
@@ -31,6 +38,7 @@ class BrailleService {
   }
 
   /// Process input from the 3 main keys
+  @override
   void processKeyInput(bool key1, bool key2, bool key3) {
     String pattern = convertKeysToBraille(key1, key2, key3);
 
@@ -69,26 +77,20 @@ class BrailleService {
   }
 
   /// Get current display text
+  @override
   String getDisplayText() {
     return outputText.join('');
   }
 
-  /// Get current input state for UI display
-  String getCurrentInputState() {
-    if (isFirstHalf) {
-      return 'Ready for first half';
-    } else {
-      return 'First: $firstHalf - Ready for second half';
-    }
-  }
-
   /// Clear all output
+  @override
   void clearOutput() {
     outputText.clear();
     _reset();
   }
 
   /// Remove last character or reset current input
+  @override
   void backspace() {
     if (!isFirstHalf && (firstHalf.isNotEmpty || secondHalf.isNotEmpty)) {
       // If we're in the middle of input, reset current input

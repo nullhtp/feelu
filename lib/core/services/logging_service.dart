@@ -32,6 +32,7 @@ class LoggingService implements ILoggingService {
   @override
   void info(String message, [Object? error, StackTrace? stackTrace]) {
     _log('INFO', message, error, stackTrace);
+    _vibrationNotificationService.vibrateNotification();
   }
 
   @override

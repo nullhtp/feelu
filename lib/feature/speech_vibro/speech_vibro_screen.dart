@@ -20,7 +20,7 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
-  late final SpeechVibroService _speechVibroService;
+  late final ISpeechVibroService _speechVibroService;
 
   SpeechVibroState _currentState = SpeechVibroState.ready;
 
@@ -32,7 +32,7 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
     super.initState();
 
     // Get service from DI container
-    _speechVibroService = ServiceLocator.get<SpeechVibroService>();
+    _speechVibroService = ServiceLocator.get<ISpeechVibroService>();
 
     _initializeAnimations();
     _initializeService();
@@ -73,18 +73,6 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
       case SpeechVibroState.processing:
         _pulseController.stop();
         break;
-    }
-  }
-
-  void _showError(String error) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error),
-          backgroundColor: Colors.red.shade700,
-          duration: const Duration(seconds: 3),
-        ),
-      );
     }
   }
 

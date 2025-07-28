@@ -23,8 +23,8 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
-  late final PhotoVibroService _photoVibroService;
-  late final CameraService _cameraService;
+  late final IPhotoVibroService _photoVibroService;
+  late final ICameraService _cameraService;
 
   PhotoVibroState _currentState = PhotoVibroState.ready;
 
@@ -36,8 +36,8 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
     super.initState();
 
     // Get services from DI container
-    _photoVibroService = ServiceLocator.get<PhotoVibroService>();
-    _cameraService = ServiceLocator.get<CameraService>();
+    _photoVibroService = ServiceLocator.get<IPhotoVibroService>();
+    _cameraService = ServiceLocator.get<ICameraService>();
 
     _initializeAnimations();
     _initializeService();
@@ -132,11 +132,9 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
           child: Stack(
             children: [
               // Camera preview background
-              if (_cameraService.isCameraReady)
-                CameraPreviewWidget(
-                  cameraController: _cameraService.cameraController,
-                  isInitialized: _cameraService.isCameraReady,
-                ),
+              CameraPreviewWidget(
+                cameraController: _cameraService.cameraController,
+              ),
 
               // Main content overlay
               Container(
@@ -147,8 +145,8 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black.withOpacity(0.3),
-                      Colors.black.withOpacity(0.7),
+                      Colors.black.withValues(alpha: 0.3),
+                      Colors.black.withValues(alpha: 0.7),
                     ],
                   ),
                 ),

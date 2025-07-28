@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/di/service_locator.dart';
 import '../braille_input/braille_input_screen.dart';
 import 'initialization_service.dart';
 import 'models/service_initialization_state.dart';
@@ -13,7 +14,8 @@ class InitializationScreen extends StatefulWidget {
 }
 
 class _InitializationScreenState extends State<InitializationScreen> {
-  final InitializationService _initializationService = InitializationService();
+  final IInitializationService _initializationService =
+      ServiceLocator.get<IInitializationService>();
 
   List<ServiceInitializationState> _services = [];
   int _currentIndex = 0;

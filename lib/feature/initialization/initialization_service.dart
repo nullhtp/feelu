@@ -4,7 +4,17 @@ import '../../core/di/service_locator.dart';
 import '../../core/services/services.dart';
 import 'models/service_initialization_state.dart';
 
-class InitializationService {
+abstract class IInitializationService {
+  Stream<List<ServiceInitializationState>> get servicesStream;
+  Stream<int> get currentIndexStream;
+  Stream<bool> get completionStream;
+  void initialize();
+  Future<bool> startInitialization();
+  Future<void> retryInitialization();
+  void dispose();
+}
+
+class InitializationService implements IInitializationService {
   final StreamController<List<ServiceInitializationState>> _servicesController =
       StreamController<List<ServiceInitializationState>>.broadcast();
   final StreamController<int> _currentIndexController =
@@ -20,9 +30,12 @@ class InitializationService {
       ServiceLocator.get<ISpeechRecognitionService>();
   final IAiModelService _aiModelService = ServiceLocator.get<IAiModelService>();
 
+  @override
   Stream<List<ServiceInitializationState>> get servicesStream =>
       _servicesController.stream;
+  @override
   Stream<int> get currentIndexStream => _currentIndexController.stream;
+  @override
   Stream<bool> get completionStream => _completionController.stream;
 
   List<ServiceInitializationState> _services = [];
@@ -33,6 +46,7 @@ class InitializationService {
   int get currentIndex => _currentIndex;
   bool get isInitializing => _isInitializing;
 
+  @override
   void initialize() {
     _initializeServices();
     _servicesController.add(_services);
@@ -63,6 +77,7 @@ class InitializationService {
     ];
   }
 
+  @override
   Future<bool> startInitialization() async {
     if (_isInitializing) return false;
 
@@ -306,6 +321,7 @@ class InitializationService {
     }
   }
 
+  @override
   Future<void> retryInitialization() async {
     _currentIndex = 0;
     _isInitializing = false;
@@ -324,6 +340,7 @@ class InitializationService {
     await startInitialization();
   }
 
+  @override
   void dispose() {
     _servicesController.close();
     _currentIndexController.close();

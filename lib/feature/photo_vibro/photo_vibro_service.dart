@@ -9,16 +9,20 @@ import 'package:flutter/material.dart';
 
 enum PhotoVibroState { ready, capturing, processing }
 
-class PhotoVibroService {
-  static final PhotoVibroService _instance = PhotoVibroService._internal();
-  static PhotoVibroService get instance => _instance;
-  PhotoVibroService._internal();
+abstract class IPhotoVibroService {
+  Stream<PhotoVibroState> get stateStream;
+  Stream<String> get errorStream;
 
+  Future<void> initialize(BuildContext context);
+  Future<void> captureAndProcess();
+  void dispose();
+}
+
+class PhotoVibroService implements IPhotoVibroService {
+  final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
   final ICameraService _cameraService = ServiceLocator.get<ICameraService>();
   final IBrailleVibrationService _brailleVibrationService =
       ServiceLocator.get<IBrailleVibrationService>();
-  final IVibrationNotification _vibrationNotificationService =
-      ServiceLocator.get<IVibrationNotification>();
   late BrailleTextOutputService _brailleTextService;
 
   final StreamController<PhotoVibroState> _stateController =
@@ -29,7 +33,9 @@ class PhotoVibroService {
   final ILlmRecognitionService _llmRecognitionService =
       ServiceLocator.get<ILlmRecognitionService>();
 
+  @override
   Stream<PhotoVibroState> get stateStream => _stateController.stream;
+  @override
   Stream<String> get errorStream => _errorController.stream;
 
   PhotoVibroState _currentState = PhotoVibroState.ready;
@@ -39,6 +45,7 @@ class PhotoVibroService {
   String get lastRecognitionResult => _lastRecognitionResult;
   BrailleTextOutputService get brailleTextService => _brailleTextService;
 
+  @override
   Future<void> initialize(BuildContext context) async {
     try {
       // Notify user they've entered photo vibro mode with camera-like pattern
@@ -50,6 +57,7 @@ class PhotoVibroService {
     _brailleTextService = BrailleTextOutputService(context: context);
   }
 
+  @override
   Future<void> captureAndProcess() async {
     if (_currentState != PhotoVibroState.ready) {
       return;
@@ -77,9 +85,11 @@ class PhotoVibroService {
       // Process through braille text service (this will trigger fullscreen automatically)
       await _brailleTextService.process(recognitionResult);
 
-      _vibrationNotificationService.vibrateNotification();
+      _loggingService.info('Image processed');
     } catch (e) {
-      _vibrationNotificationService.vibrateError();
+      _loggingService.error(
+        'Error capturing/processing image: ${e.toString()}',
+      );
       _errorController.add('Error capturing/processing image: ${e.toString()}');
     } finally {
       _updateState(PhotoVibroState.ready);
@@ -91,6 +101,7 @@ class PhotoVibroService {
     _stateController.add(newState);
   }
 
+  @override
   void dispose() {
     _stateController.close();
     _errorController.close();

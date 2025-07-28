@@ -2,13 +2,14 @@ import 'package:flutter_gemma/flutter_gemma.dart';
 
 import '../core/di/service_locator.dart';
 import '../core/interfaces.dart';
-import '../core/services/ai_model_service.dart';
+import '../core/services/services.dart';
 
 abstract class ILlmDecodeService implements Transformable {}
 
 /// Service class that handles all Gemma AI model operations
 class LlmDecodeService implements ILlmDecodeService {
   final IAiModelService _aiModelService = ServiceLocator.get<IAiModelService>();
+  final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
   @override
   Future<void> dispose() async {}
 
@@ -37,7 +38,7 @@ class LlmDecodeService implements ILlmDecodeService {
 
       // Generate and stream the response
       final response = await session.getResponse();
-      print(response);
+      _loggingService.info('LLM Decode Response: $response');
       return response;
     } catch (e) {
       throw Exception('Error generating response: $e');

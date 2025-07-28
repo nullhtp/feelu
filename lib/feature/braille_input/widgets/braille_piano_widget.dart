@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../braille_service.dart';
 import 'braille_piano_key.dart';
 
 class BraillePianoWidget extends StatefulWidget {
-  final BrailleService brailleService;
-  final Function(String) onTextGenerated;
+  final Function(bool, bool, bool) onSubmitInput;
 
-  const BraillePianoWidget({
-    super.key,
-    required this.brailleService,
-    required this.onTextGenerated,
-  });
+  const BraillePianoWidget({super.key, required this.onSubmitInput});
 
   @override
   State<BraillePianoWidget> createState() => _BraillePianoWidgetState();
@@ -30,32 +24,24 @@ class _BraillePianoWidgetState extends State<BraillePianoWidget> {
     // Auto-submit after a longer delay to allow multiple key presses
     Future.delayed(const Duration(milliseconds: 200), () {
       if (mounted && _currentKeysPressed.any((pressed) => pressed)) {
-        _submitCurrentInput();
+        widget.onSubmitInput(
+          _currentKeysPressed[0],
+          _currentKeysPressed[1],
+          _currentKeysPressed[2],
+        );
       }
-    });
-  }
 
-  void _submitCurrentInput() {
-    // Check if any keys are pressed
-    if (_currentKeysPressed.any((pressed) => pressed)) {
-      widget.brailleService.processKeyInput(
-        _currentKeysPressed[0],
-        _currentKeysPressed[1],
-        _currentKeysPressed[2],
-      );
-
-      // Reset key states
       setState(() {
         _currentKeysPressed = [false, false, false];
       });
-
-      widget.onTextGenerated(widget.brailleService.getDisplayText());
-    }
+    });
   }
 
   void _handleSpaceKey() {
-    widget.brailleService.processSpaceKey();
-    widget.onTextGenerated(widget.brailleService.getDisplayText());
+    widget.onSubmitInput(false, false, false);
+    setState(() {
+      _currentKeysPressed = [false, false, false];
+    });
   }
 
   @override

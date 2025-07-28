@@ -9,15 +9,18 @@ import 'package:flutter/material.dart';
 
 enum SpeechVibroState { ready, listening, processing }
 
-class SpeechVibroService {
-  static final SpeechVibroService _instance = SpeechVibroService._internal();
-  static SpeechVibroService get instance => _instance;
-  SpeechVibroService._internal();
+abstract class ISpeechVibroService {
+  Stream<SpeechVibroState> get stateStream;
 
+  Future<void> initialize(BuildContext context);
+  Future<void> startListening();
+  Future<void> forceListen();
+  void dispose();
+}
+
+class SpeechVibroService implements ISpeechVibroService {
   final ISpeechRecognitionService _speechRecognitionService =
       ServiceLocator.get<ISpeechRecognitionService>();
-  final IVibrationNotification _vibrationNotificationService =
-      ServiceLocator.get<IVibrationNotification>();
   final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
   late BrailleTextOutputService _brailleTextService;
 
@@ -29,6 +32,7 @@ class SpeechVibroService {
       StreamController<SpeechVibroState>.broadcast();
 
   Stream<String> get summarizedTextStream => _summarizedTextController.stream;
+  @override
   Stream<SpeechVibroState> get stateStream => _stateController.stream;
 
   SpeechVibroState _currentState = SpeechVibroState.ready;
@@ -41,6 +45,7 @@ class SpeechVibroService {
   ILlmSummarizationService get llmSummarizationService =>
       ServiceLocator.get<ILlmSummarizationService>();
 
+  @override
   Future<void> initialize(BuildContext context) async {
     try {
       await _speechRecognitionService.initialize();
@@ -56,7 +61,7 @@ class SpeechVibroService {
       ServiceLocator.get<BrailleVibrationService>().vibrateBraille('s');
     } catch (e) {
       _loggingService.error('Failed to initialize services: ${e.toString()}');
-      throw e;
+      rethrow;
     }
   }
 
@@ -76,6 +81,7 @@ class SpeechVibroService {
         );
   }
 
+  @override
   Future<void> startListening() async {
     if (_currentState != SpeechVibroState.ready) return;
 
@@ -84,7 +90,7 @@ class SpeechVibroService {
       _summarizedTextController.add('');
     }
 
-    _vibrationNotificationService.vibrateNotification();
+    _loggingService.info('Listening');
 
     try {
       final recognizedText = await _speechRecognitionService.startListening();
@@ -94,7 +100,7 @@ class SpeechVibroService {
       if (recognizedText.isNotEmpty) {
         await _processRecognizedText(recognizedText);
       } else {
-        _vibrationNotificationService.vibrateWarning();
+        _loggingService.warning('No text recognized');
       }
     } catch (e) {
       _updateState(SpeechVibroState.ready);
@@ -107,7 +113,7 @@ class SpeechVibroService {
 
     try {
       await _summarizationPipeline.process(text);
-      _vibrationNotificationService.vibrateNotification();
+      _loggingService.info('Processing recognized text');
     } catch (e) {
       _loggingService.error(
         'Error processing recognized text: ${e.toString()}',
@@ -117,8 +123,9 @@ class SpeechVibroService {
     }
   }
 
+  @override
   Future<void> forceListen() async {
-    _vibrationNotificationService.vibrateNotification();
+    _loggingService.info('Force listening');
     await startListening();
   }
 
@@ -129,6 +136,7 @@ class SpeechVibroService {
     }
   }
 
+  @override
   void dispose() {
     _speechRecognitionService.dispose();
     _summarizationPipeline.dispose();

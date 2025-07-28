@@ -94,14 +94,14 @@ class _BraillePianoKeyState extends State<BraillePianoKey>
                   border: Border.all(color: Colors.white30, width: 3),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       offset: const Offset(0, 4),
                       blurRadius: 8,
                       spreadRadius: 0,
                     ),
                     if (_isCurrentlyPressed || widget.isPressed)
                       BoxShadow(
-                        color: widget.pressedColor.withOpacity(0.3),
+                        color: widget.pressedColor.withValues(alpha: 0.3),
                         offset: const Offset(0, 2),
                         blurRadius: 12,
                         spreadRadius: 2,

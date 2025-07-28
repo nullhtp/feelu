@@ -11,7 +11,7 @@ class BrailleFullscreenScreen extends StatefulWidget {
   final Color themeColor;
   final IBrailleVibrationService brailleVibrationService;
 
-  BrailleFullscreenScreen({
+  const BrailleFullscreenScreen({
     super.key,
     required this.sourceText,
     this.sourceTitle = 'BRAILLE OUTPUT',
@@ -144,7 +144,10 @@ class _BrailleFullscreenScreenState extends State<BrailleFullscreenScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.black,
-        border: Border.all(color: widget.themeColor.withOpacity(0.3), width: 2),
+        border: Border.all(
+          color: widget.themeColor.withValues(alpha: 0.3),
+          width: 2,
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
       child: BrailleTextWidget(

@@ -5,9 +5,10 @@ import 'package:flutter/foundation.dart';
 
 import '../di/service_locator.dart';
 import 'logging_service.dart';
-import 'vibration_notification_service.dart';
 
 abstract class ICameraService {
+  CameraController? get cameraController;
+
   Future<bool> initialize();
   Future<void> dispose();
   Future<Uint8List?> captureImage();
@@ -28,9 +29,6 @@ class CameraService implements ICameraService {
 
   final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
 
-  final IVibrationNotification _vibrationNotificationService =
-      ServiceLocator.get<IVibrationNotification>();
-
   // Stream getters
   Stream<bool> get initializationStream => _initializationController.stream;
   Stream<String> get errorStream => _errorController.stream;
@@ -39,6 +37,8 @@ class CameraService implements ICameraService {
   bool get isInitialized => _isInitialized;
   bool get isCameraReady =>
       _isInitialized && (_cameraController?.value.isInitialized ?? false);
+
+  @override
   CameraController? get cameraController => _cameraController;
   List<CameraDescription> get cameras => _cameras;
 
@@ -100,7 +100,7 @@ class CameraService implements ICameraService {
 
     try {
       // Provide haptic feedback for capture
-      _vibrationNotificationService.vibrateNotification();
+      _loggingService.info('CameraService: Capturing image');
 
       final XFile image = await _cameraController!.takePicture();
       final Uint8List imageBytes = await image.readAsBytes();
@@ -114,7 +114,6 @@ class CameraService implements ICameraService {
       final errorMsg = 'Failed to capture image: ${e.toString()}';
       _loggingService.error(errorMsg);
       _errorController.add(errorMsg);
-      _vibrationNotificationService.vibrateError();
       rethrow;
     }
   }

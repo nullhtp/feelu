@@ -155,9 +155,6 @@ class _BrailleFullscreenScreenState extends State<BrailleFullscreenScreen> {
       child: BrailleTextWidget(
         symbolSize: 40.0, // Larger for better touch accessibility
         spacing: 16.0, // More spacing for easier navigation
-        activeColor: widget.themeColor,
-        inactiveColor: Colors.grey.shade700,
-        backgroundColor: Colors.black,
         symbols: _brailleSymbols,
       ),
     );

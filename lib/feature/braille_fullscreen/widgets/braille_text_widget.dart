@@ -9,18 +9,12 @@ class BrailleTextWidget extends StatefulWidget {
   final List<BrailleSymbol> symbols;
   final double symbolSize;
   final double spacing;
-  final Color activeColor;
-  final Color inactiveColor;
-  final Color backgroundColor;
 
-  BrailleTextWidget({
+  const BrailleTextWidget({
     super.key,
     required this.symbols,
     this.symbolSize = 60.0,
     this.spacing = 16.0,
-    this.activeColor = Colors.black,
-    this.inactiveColor = Colors.grey,
-    this.backgroundColor = Colors.white,
   });
 
   @override
@@ -72,7 +66,7 @@ class _BrailleTextWidgetState extends State<BrailleTextWidget> {
     }
 
     return Container(
-      color: widget.backgroundColor,
+      color: Colors.black,
       padding: const EdgeInsets.all(16.0),
       child: GestureDetector(
         onPanUpdate: (details) => _handlePanUpdate(details),
@@ -90,8 +84,6 @@ class _BrailleTextWidgetState extends State<BrailleTextWidget> {
                     child: BrailleSymbolWidget(
                       symbol: entry.value,
                       symbolSize: widget.symbolSize,
-                      activeColor: widget.activeColor,
-                      inactiveColor: widget.inactiveColor,
                       onTap: () => _onSymbolTap(entry.value),
                     ),
                   ),
@@ -163,16 +155,12 @@ class _BrailleTextWidgetState extends State<BrailleTextWidget> {
 class BrailleSymbolWidget extends StatelessWidget {
   final BrailleSymbol symbol;
   final double symbolSize;
-  final Color activeColor;
-  final Color inactiveColor;
   final VoidCallback onTap;
 
   const BrailleSymbolWidget({
     super.key,
     required this.symbol,
     required this.symbolSize,
-    required this.activeColor,
-    required this.inactiveColor,
     required this.onTap,
   });
 
@@ -264,9 +252,9 @@ class BrailleSymbolWidget extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isActive ? activeColor : inactiveColor,
+        color: isActive ? Colors.black : Colors.white,
         border: Border.all(
-          color: isActive ? activeColor : inactiveColor.withOpacity(0.3),
+          color: isActive ? Colors.black : Colors.white,
           width: 1,
         ),
       ),

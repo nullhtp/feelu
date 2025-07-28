@@ -96,7 +96,7 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
     }
   }
 
-  Future<void> _forceListen() async {
+  Future<void> _startListening() async {
     await _speechVibroService.forceListen();
   }
 
@@ -124,18 +124,20 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
         child: SpeechVibroGestureDetector(
           onSwipeLeft: _navigateToBrailleInput,
           onSwipeDown: () {},
-          onSwipeUp: _forceListen,
-          child: Column(
-            children: [
-              StatusIndicatorWidget(
-                isListening: _currentState == SpeechVibroState.listening,
-                isProcessing: _currentState == SpeechVibroState.processing,
-                pulseAnimation: _pulseAnimation,
+          onSwipeUp: () {}, // Remove swipe up to listen functionality
+          child: GestureDetector(
+            onTap: _startListening,
+            child: Container(
+              width: double.infinity,
+              height: double.infinity,
+              child: Center(
+                child: StatusIndicatorWidget(
+                  isListening: _currentState == SpeechVibroState.listening,
+                  isProcessing: _currentState == SpeechVibroState.processing,
+                  pulseAnimation: _pulseAnimation,
+                ),
               ),
-              Expanded(
-                child: SummarizedOutputWidget(summarizedText: _summarizedText),
-              ),
-            ],
+            ),
           ),
         ),
       ),

@@ -10,6 +10,7 @@ abstract class ILlmDecodeService implements Transformable {}
 class LlmDecodeService implements ILlmDecodeService {
   final IAiModelService _aiModelService = ServiceLocator.get<IAiModelService>();
   final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
+
   @override
   Future<void> dispose() async {}
 

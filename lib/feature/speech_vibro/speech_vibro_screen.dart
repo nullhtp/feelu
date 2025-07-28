@@ -20,19 +20,16 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
-  late final ISpeechVibroService _speechVibroService;
+  final ISpeechVibroService _speechVibroService =
+      ServiceLocator.get<ISpeechVibroService>();
 
   SpeechVibroState _currentState = SpeechVibroState.ready;
 
   late StreamSubscription<SpeechVibroState> _stateSubscription;
-  late StreamSubscription<String> _errorSubscription;
 
   @override
   void initState() {
     super.initState();
-
-    // Get service from DI container
-    _speechVibroService = ServiceLocator.get<ISpeechVibroService>();
 
     _initializeAnimations();
     _initializeService();
@@ -90,7 +87,6 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
   void dispose() {
     _pulseController.dispose();
     _stateSubscription.cancel();
-    _errorSubscription.cancel();
     _speechVibroService.dispose();
     super.dispose();
   }

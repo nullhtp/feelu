@@ -22,8 +22,11 @@ class SpeechVibroService implements ISpeechVibroService {
   final ISpeechRecognitionService _speechRecognitionService =
       ServiceLocator.get<ISpeechRecognitionService>();
   final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
-  late BrailleTextOutputService _brailleTextService;
 
+  final IBrailleVibrationService _brailleVibrationService =
+      ServiceLocator.get<IBrailleVibrationService>();
+
+  late BrailleTextOutputService _brailleTextService;
   late Pipeline _summarizationPipeline;
 
   final StreamController<String> _summarizedTextController =
@@ -48,7 +51,6 @@ class SpeechVibroService implements ISpeechVibroService {
   @override
   Future<void> initialize(BuildContext context) async {
     try {
-      await _speechRecognitionService.initialize();
       _brailleTextService = BrailleTextOutputService(context: context);
       _summarizationPipeline = Pipeline(
         transformable: llmSummarizationService,
@@ -58,7 +60,7 @@ class SpeechVibroService implements ISpeechVibroService {
 
       await _summarizationPipeline.initialize();
 
-      ServiceLocator.get<IBrailleVibrationService>().vibrateBraille('s');
+      _brailleVibrationService.vibrateBraille('s');
     } catch (e) {
       _loggingService.error('Failed to initialize services: ${e.toString()}');
       rethrow;

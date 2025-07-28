@@ -5,11 +5,9 @@ import 'logging_service.dart';
 
 abstract class ISpeechRecognitionService {
   bool get isInitialized;
-  bool get isListening;
   Future<void> initialize();
   Future<String> startListening();
   Future<void> stopListening();
-  Future<bool> isAvailable();
   Future<void> dispose();
 }
 
@@ -22,9 +20,6 @@ class SpeechRecognitionService implements ISpeechRecognitionService {
   // Getters
   @override
   bool get isInitialized => _isInitialized;
-
-  @override
-  bool get isListening => _isListening;
 
   @override
   Future<void> initialize() async {
@@ -142,12 +137,6 @@ class SpeechRecognitionService implements ISpeechRecognitionService {
       await _speechToText.stop();
       _isListening = false;
     }
-  }
-
-  /// Check if speech recognition is available
-  @override
-  Future<bool> isAvailable() async {
-    return _isInitialized;
   }
 
   @override

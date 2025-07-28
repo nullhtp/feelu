@@ -28,11 +28,11 @@ class GemmaService implements IAiModelService {
   InferenceModel? _inferenceModel;
   late final ModelDownloader _downloaderDataSource;
 
-  bool _isModelLoading = false;
-  String _loadingMessage = 'Initializing...';
   double? _downloadProgress;
   String? _errorMessage;
+  String _loadingMessage = 'Initializing...';
   bool _canRetry = false;
+  bool _isModelLoading = false;
 
   // Stream controllers for state updates
   final _modelLoadingController = StreamController<bool>.broadcast();
@@ -44,6 +44,7 @@ class GemmaService implements IAiModelService {
   // Stream getters
   @override
   Stream<String> get loadingMessageStream => _loadingMessageController.stream;
+
   @override
   Stream<double?> get downloadProgressStream =>
       _downloadProgressController.stream;
@@ -52,9 +53,10 @@ class GemmaService implements IAiModelService {
   bool get isModelLoading => _isModelLoading;
   String get loadingMessage => _loadingMessage;
   double? get downloadProgress => _downloadProgress;
+  bool get canRetry => _canRetry;
+
   @override
   String? get errorMessage => _errorMessage;
-  bool get canRetry => _canRetry;
 
   @override
   bool get isInitialized => _inferenceModel != null;
@@ -64,6 +66,39 @@ class GemmaService implements IAiModelService {
   Future<void> initialize() async {
     _downloaderDataSource = ModelDownloader(model: Model.gemma3nNetwork);
     await _initializeModel();
+  }
+
+  /// Send a message and get a response stream
+  @override
+  Future<InferenceChat> createChat({
+    bool supportImage = true,
+    double temperature = 0,
+  }) async {
+    return await _inferenceModel!.createChat(
+      supportImage: supportImage,
+      temperature: temperature,
+      randomSeed: 1,
+      topK: 1,
+    );
+  }
+
+  @override
+  Future<InferenceModelSession> createSession() async {
+    return await _inferenceModel!.createSession(
+      temperature: 0,
+      randomSeed: 1,
+      topK: 1,
+    );
+  }
+
+  /// Dispose of resources
+  @override
+  void dispose() {
+    _modelLoadingController.close();
+    _loadingMessageController.close();
+    _downloadProgressController.close();
+    _errorMessageController.close();
+    _canRetryController.close();
   }
 
   /// Initialize the AI model
@@ -150,41 +185,6 @@ class GemmaService implements IAiModelService {
     }
   }
 
-  /// Retry model initialization
-  @override
-  Future<void> retryInitialization() async {
-    await _initializeModel();
-  }
-
-  /// Send a message and get a response stream
-  @override
-  Future<InferenceChat> createChat({
-    bool supportImage = true,
-    double temperature = 0,
-  }) async {
-    return await _inferenceModel!.createChat(
-      supportImage: supportImage,
-      temperature: temperature,
-      randomSeed: 1,
-      topK: 1,
-    );
-  }
-
-  @override
-  Future<InferenceModelSession> createSession() async {
-    return await _inferenceModel!.createSession(
-      temperature: 0,
-      randomSeed: 1,
-      topK: 1,
-    );
-  }
-
-  /// Clear corrupted model
-  @override
-  Future<void> clearCorruptedModel() async {
-    await _downloaderDataSource.clearCorruptedModel();
-  }
-
   /// Update internal state and notify listeners
   void _updateState({
     bool? isModelLoading,
@@ -217,15 +217,5 @@ class GemmaService implements IAiModelService {
       _canRetry = canRetry;
       _canRetryController.add(_canRetry);
     }
-  }
-
-  /// Dispose of resources
-  @override
-  void dispose() {
-    _modelLoadingController.close();
-    _loadingMessageController.close();
-    _downloadProgressController.close();
-    _errorMessageController.close();
-    _canRetryController.close();
   }
 }

@@ -105,5 +105,6 @@ class PhotoVibroService implements IPhotoVibroService {
   void dispose() {
     _stateController.close();
     _errorController.close();
+    _cameraService.dispose();
   }
 }

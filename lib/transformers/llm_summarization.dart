@@ -10,6 +10,7 @@ abstract class ILlmSummarizationService implements Transformable {}
 class LlmSummarizationService implements ILlmSummarizationService {
   final IAiModelService _aiModelService = ServiceLocator.get<IAiModelService>();
   final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
+
   @override
   Future<void> dispose() async {}
 

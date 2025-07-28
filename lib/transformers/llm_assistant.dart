@@ -10,6 +10,7 @@ abstract class ILlmAssistantService implements Transformable {}
 class LlmAssistantService implements ILlmAssistantService {
   final IAiModelService _aiModelService = ServiceLocator.get<IAiModelService>();
   final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
+
   @override
   Future<void> dispose() async {}
 

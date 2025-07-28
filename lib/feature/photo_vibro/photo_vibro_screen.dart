@@ -6,10 +6,7 @@ import '../../core/di/service_locator.dart';
 import '../../core/services/camera_service.dart';
 import '../braille_input/braille_input_screen.dart';
 import 'photo_vibro_service.dart';
-import 'widgets/camera_preview_widget.dart';
-import 'widgets/camera_status_indicator_widget.dart';
-import 'widgets/photo_vibro_gesture_detector.dart';
-import 'widgets/recognition_result_widget.dart';
+import 'widgets/widgets.dart';
 
 class PhotoVibroScreen extends StatefulWidget {
   const PhotoVibroScreen({super.key});

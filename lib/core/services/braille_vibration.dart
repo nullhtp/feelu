@@ -45,18 +45,18 @@ class BrailleVibrationService implements IBrailleVibrationService {
     final Map<int, List<int>> patternMap = {
       1: [40, 200], // 001
       2: [120, 200], // 010
-      3: [250, 200], // 011
+      3: [255, 200], // 011
       4: [40, 500], // 100
       5: [120, 500], // 101
-      6: [250, 500], // 110
-      7: [250, 1000], // 111
+      6: [255, 500], // 110
+      7: [255, 1000], // 111
     };
     final pattern = patternMap[bits];
     if (pattern == null) {
       return;
     }
 
-    await Vibration.vibrate(duration: pattern.first, amplitude: pattern.last);
+    await Vibration.vibrate(duration: pattern.last, amplitude: pattern.first);
     await Future.delayed(const Duration(milliseconds: 500));
   }
 }

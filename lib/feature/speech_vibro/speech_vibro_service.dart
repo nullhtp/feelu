@@ -58,7 +58,7 @@ class SpeechVibroService implements ISpeechVibroService {
 
       await _summarizationPipeline.initialize();
 
-      ServiceLocator.get<BrailleVibrationService>().vibrateBraille('s');
+      ServiceLocator.get<IBrailleVibrationService>().vibrateBraille('s');
     } catch (e) {
       _loggingService.error('Failed to initialize services: ${e.toString()}');
       rethrow;

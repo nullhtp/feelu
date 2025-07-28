@@ -9,23 +9,18 @@ import '../domain/model.dart';
 import 'model_downloader.dart';
 
 abstract class IAiModelService {
-  Stream<bool> get modelLoadingStream;
   Stream<String> get loadingMessageStream;
   Stream<double?> get downloadProgressStream;
-  Stream<String?> get errorMessageStream;
-  Stream<bool> get canRetryStream;
 
   bool get isInitialized;
   String? get errorMessage;
 
   Future<void> initialize();
-  Future<void> retryInitialization();
   Future<InferenceChat> createChat({
     bool supportImage = true,
     double temperature = 0,
   });
   Future<InferenceModelSession> createSession();
-  Future<void> clearCorruptedModel();
   void dispose();
 }
 
@@ -48,16 +43,10 @@ class GemmaService implements IAiModelService {
 
   // Stream getters
   @override
-  Stream<bool> get modelLoadingStream => _modelLoadingController.stream;
-  @override
   Stream<String> get loadingMessageStream => _loadingMessageController.stream;
   @override
   Stream<double?> get downloadProgressStream =>
       _downloadProgressController.stream;
-  @override
-  Stream<String?> get errorMessageStream => _errorMessageController.stream;
-  @override
-  Stream<bool> get canRetryStream => _canRetryController.stream;
 
   // Getters for current state
   bool get isModelLoading => _isModelLoading;

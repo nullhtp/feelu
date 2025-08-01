@@ -47,12 +47,7 @@ class _BraillePianoWidgetState extends State<BraillePianoWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade900,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white30, width: 2),
-      ),
+      padding: const EdgeInsets.all(2),
       child: Column(
         children: [
           // Keys layout - 4 keys in horizontal row taking full width
@@ -68,7 +63,6 @@ class _BraillePianoWidgetState extends State<BraillePianoWidget> {
                       onPressed: () => _handleKeyPress(0),
                       isPressed: _currentKeysPressed[0],
                       pressedColor: Colors.blue.shade600,
-                      keyColor: Colors.grey.shade800,
                       isSpaceKey: false,
                     ),
                   ),
@@ -83,7 +77,6 @@ class _BraillePianoWidgetState extends State<BraillePianoWidget> {
                       onPressed: () => _handleKeyPress(1),
                       isPressed: _currentKeysPressed[1],
                       pressedColor: Colors.green.shade600,
-                      keyColor: Colors.grey.shade800,
                       isSpaceKey: false,
                     ),
                   ),
@@ -98,7 +91,6 @@ class _BraillePianoWidgetState extends State<BraillePianoWidget> {
                       onPressed: () => _handleKeyPress(2),
                       isPressed: _currentKeysPressed[2],
                       pressedColor: Colors.orange.shade600,
-                      keyColor: Colors.grey.shade800,
                       isSpaceKey: false,
                     ),
                   ),
@@ -113,7 +105,6 @@ class _BraillePianoWidgetState extends State<BraillePianoWidget> {
                       label: 'SPACE',
                       onPressed: _handleSpaceKey,
                       isSpaceKey: false,
-                      keyColor: Colors.grey.shade700,
                       pressedColor: Colors.purple.shade600,
                     ),
                   ),

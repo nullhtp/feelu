@@ -29,7 +29,11 @@ class SwipeGestureDetector extends StatefulWidget {
   final VoidCallback? onSwipeUpFourFingers;
   final VoidCallback? onSwipeDownFourFingers;
 
+  // Multi-finger tap callbacks
   final VoidCallback? onTap;
+  final VoidCallback? onTapTwoFingers;
+  final VoidCallback? onTapThreeFingers;
+  final VoidCallback? onTapFourFingers;
   final VoidCallback? onLongPress;
   final double minSwipeDistance;
   final double minSwipeVelocity;
@@ -54,6 +58,9 @@ class SwipeGestureDetector extends StatefulWidget {
     this.onSwipeUpFourFingers,
     this.onSwipeDownFourFingers,
     this.onTap,
+    this.onTapTwoFingers,
+    this.onTapThreeFingers,
+    this.onTapFourFingers,
     this.onLongPress,
     this.minSwipeDistance = 50.0,
     this.minSwipeVelocity = 300.0,
@@ -179,9 +186,11 @@ class _SwipeGestureDetectorState extends State<SwipeGestureDetector> {
         }
       }
     } else {
+      // Gesture didn't meet swipe threshold, treat as tap
       print(
-        'Gesture did not meet threshold - distance: $distance, velocity: $velocity',
+        'Gesture treated as tap - fingers: $fingerCount, distance: $distance, velocity: $velocity',
       );
+      _handleTap(fingerCount);
     }
 
     _resetGestureState();
@@ -193,6 +202,23 @@ class _SwipeGestureDetectorState extends State<SwipeGestureDetector> {
     _gestureStartTime = null;
     _lastMoveTime = null;
     _maxFingerCount = 0;
+  }
+
+  void _handleTap(int fingerCount) {
+    switch (fingerCount) {
+      case 1:
+        widget.onTap?.call();
+        break;
+      case 2:
+        widget.onTapTwoFingers?.call();
+        break;
+      case 3:
+        widget.onTapThreeFingers?.call();
+        break;
+      case 4:
+        widget.onTapFourFingers?.call();
+        break;
+    }
   }
 
   void _handleSwipeLeft(int fingerCount) {

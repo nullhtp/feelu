@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 
 import '../../core/di/service_locator.dart';
 import '../../core/services/camera_service.dart';
+import '../../core/widgets/icon_paths.dart';
+import '../../core/widgets/icon_text_widget.dart';
+import '../../core/widgets/swipe_gesture_detector.dart';
 import '../braille_input/braille_input_screen.dart';
 import 'photo_vibro_service.dart';
-import 'widgets/widgets.dart';
+import 'widgets/camera_preview_widget.dart';
 
 class PhotoVibroScreen extends StatefulWidget {
   const PhotoVibroScreen({super.key});
@@ -15,11 +18,7 @@ class PhotoVibroScreen extends StatefulWidget {
   State<PhotoVibroScreen> createState() => _PhotoVibroScreenState();
 }
 
-class _PhotoVibroScreenState extends State<PhotoVibroScreen>
-    with TickerProviderStateMixin {
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
-
+class _PhotoVibroScreenState extends State<PhotoVibroScreen> {
   late final IPhotoVibroService _photoVibroService;
   late final ICameraService _cameraService;
 
@@ -36,19 +35,8 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
     _photoVibroService = ServiceLocator.get<IPhotoVibroService>();
     _cameraService = ServiceLocator.get<ICameraService>();
 
-    _initializeAnimations();
     _initializeService();
     _subscribeToStreams();
-  }
-
-  void _initializeAnimations() {
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 1000),
-      vsync: this,
-    );
-    _pulseAnimation = Tween<double>(begin: 0.9, end: 1.1).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
   }
 
   Future<void> _initializeService() async {
@@ -65,25 +53,12 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
         setState(() {
           _currentState = state;
         });
-        _handleStateChange(state);
       }
     });
 
     _errorSubscription = _photoVibroService.errorStream.listen((error) {
       _showError(error);
     });
-  }
-
-  void _handleStateChange(PhotoVibroState state) {
-    switch (state) {
-      case PhotoVibroState.capturing:
-        _pulseController.repeat(reverse: true);
-        break;
-      case PhotoVibroState.ready:
-      case PhotoVibroState.processing:
-        _pulseController.stop();
-        break;
-    }
   }
 
   void _showError(String error) {
@@ -110,7 +85,6 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
 
   @override
   void dispose() {
-    _pulseController.dispose();
     _stateSubscription.cancel();
     _errorSubscription.cancel();
     _photoVibroService.dispose();
@@ -122,9 +96,8 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: PhotoVibroGestureDetector(
-          onSwipeRight: _navigateToBrailleInput,
-          onSwipeDown: () {},
+        child: SwipeGestureDetector(
+          onSwipeRightThreeFingers: _navigateToBrailleInput,
           onTap: _capturePhoto,
           child: Stack(
             children: [
@@ -147,43 +120,37 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen>
                     ],
                   ),
                 ),
-                child: Column(
-                  children: [
-                    // Status indicator
-                    Expanded(
-                      flex: 1,
-                      child: Center(
-                        child: CameraStatusIndicatorWidget(
-                          isCapturing:
-                              _currentState == PhotoVibroState.capturing,
-                          isProcessing:
-                              _currentState == PhotoVibroState.processing,
-                          pulseAnimation: _pulseAnimation,
-                        ),
-                      ),
-                    ),
-
-                    // Recognition result
-                    Expanded(
-                      flex: 1,
-                      child: Center(
-                        child: RecognitionResultWidget(
-                          recognitionResult:
-                              _currentState == PhotoVibroState.ready
-                              ? 'Tap to capture photo'
-                              : _currentState == PhotoVibroState.capturing
-                              ? 'Capturing...'
-                              : 'Processing...',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                child: Center(child: _buildMainContent()),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildMainContent() {
+    switch (_currentState) {
+      case PhotoVibroState.ready:
+        return IconTextWidget(
+          svgIcon: IconPaths.eye,
+          text: 'Tap to see',
+          iconColor: Colors.grey,
+          textColor: Colors.grey,
+        );
+      case PhotoVibroState.capturing:
+        return IconTextWidget(
+          svgIcon: IconPaths.eye,
+          text: 'Capturing...',
+          iconColor: Colors.green,
+          textColor: Colors.green,
+        );
+      case PhotoVibroState.processing:
+        return IconTextWidget(
+          imageIcon: IconPaths.gemma3n,
+          text: 'Describing...',
+          textColor: Colors.white,
+        );
+    }
   }
 }

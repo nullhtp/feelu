@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import '../../core/di/service_locator.dart';
 import '../../core/interfaces.dart';
 import '../../core/services/services.dart';
+import '../../core/widgets/icon_paths.dart';
+import '../../core/widgets/icon_text_widget.dart';
+import '../../core/widgets/swipe_gesture_detector.dart';
 import '../../feature/braille_fullscreen/braille_fullscreen_screen.dart';
 import '../../feature/photo_vibro/photo_vibro_screen.dart';
 import '../../feature/speech_vibro/speech_vibro_screen.dart';
@@ -14,6 +17,13 @@ import '../../transformers/llm_assistant.dart';
 import '../../transformers/llm_decode.dart';
 import 'braille_service.dart';
 import 'widgets/braille_piano_widget.dart';
+
+enum BrailleInputState {
+  ready,
+  processingTransform,
+  processingOutput,
+  processingAssistant,
+}
 
 class BrailleInputScreen extends StatefulWidget {
   const BrailleInputScreen({super.key});
@@ -36,6 +46,7 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
 
   String _displayText = '';
   bool _isSpeaking = false; // Add flag to prevent multiple speak calls
+  BrailleInputState _currentState = BrailleInputState.ready;
 
   late Pipeline _outputPipeline;
   late Pipeline _assistantPipeline;
@@ -43,6 +54,9 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Initialize display text with current service state
+    _displayText = _brailleService.getDisplayText();
 
     // BrailleTextOutputService needs context
     _brailleTextOutputService = BrailleTextOutputService(context: context);
@@ -102,7 +116,31 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
     } else {
       // Speak the inputted text
       _loggingService.info('Speaking text');
+
+      // Set state to transform phase
+      setState(() {
+        _currentState = BrailleInputState.processingTransform;
+      });
+
+      // Listen for transform completion to switch to output phase
+      final subscription = _outputPipeline.transformedDataStream.listen((_) {
+        if (mounted) {
+          setState(() {
+            _currentState = BrailleInputState.processingOutput;
+          });
+        }
+      });
+
       await _outputPipeline.process(textToSpeak);
+
+      // Clean up and reset state
+      subscription.cancel();
+      if (mounted) {
+        setState(() {
+          _currentState = BrailleInputState.ready;
+        });
+      }
+
       _loggingService.info('Text spoken');
     }
   }
@@ -113,9 +151,21 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
       // Speak a message indicating no text
       _loggingService.warning('No text to ask assistant');
     } else {
-      // Speak the inputted text
+      // Set state to processing assistant
+      setState(() {
+        _currentState = BrailleInputState.processingAssistant;
+      });
+
       _loggingService.info('Asking assistant');
       await _assistantPipeline.process(textToSpeak);
+
+      // Reset state
+      if (mounted) {
+        setState(() {
+          _currentState = BrailleInputState.ready;
+        });
+      }
+
       _loggingService.info('Assistant asked');
     }
   }
@@ -130,159 +180,116 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: GestureDetector(
-          // Add swipe down detection for the entire screen
-          onPanUpdate: (details) async {
-            // Check if swipe is moving downward and not already speaking
-            if (details.delta.dy > 5 && !_isSpeaking) {
-              try {
-                _isSpeaking = true;
-                await _speakText();
-              } catch (e) {
-                _loggingService.error('Error speaking text: $e');
-              } finally {
-                _isSpeaking = false;
-              }
-            }
-            if (details.delta.dy < -5 && !_isSpeaking) {
-              try {
-                _isSpeaking = true;
-                await _askAssistant();
-              } catch (e) {
-                _loggingService.error('Error asking assistant: $e');
-              } finally {
-                _isSpeaking = false;
-              }
-            }
-            // Swipe right to navigate to speech vibro screen
-            if (details.delta.dx > 5) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => const SpeechVibroScreen(),
-                ),
-              );
-            }
-            // Swipe left to navigate to photo vibro screen
-            if (details.delta.dx < -5) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => const PhotoVibroScreen(),
-                ),
-              );
-            }
-          },
-          child: Column(
-            children: [
-              // Text display area (top)
-              Expanded(
-                flex: 1,
-                child: GestureDetector(
-                  onTap: () {
-                    // Delete functionality - tap anywhere in text area to delete
-                    _handleBackspace();
-                  },
-                  onLongPress: () {
-                    // Clear all text - long press anywhere in text area
-                    _handleClearAll();
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.all(8),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade900,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white30, width: 2),
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'TEXT OUTPUT',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white70,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  'Tap to delete | Long press to clear all',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.white54,
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                ),
-                                Text(
-                                  'Swipe down to speak text | Swipe up to ask assistant',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.green.shade300,
-                                    fontStyle: FontStyle.italic,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Expanded(
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              color: Colors.black,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.white, width: 2),
-                            ),
-                            child: SingleChildScrollView(
-                              child: Text(
-                                _displayText.isEmpty
-                                    ? 'Text appears here...'
-                                    : _displayText,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontFamily: 'monospace',
-                                  color: _displayText.isEmpty
-                                      ? Colors.white60
-                                      : Colors.white,
-                                  height: 1.2,
-                                  fontWeight: FontWeight.bold,
-                                  shadows: [
-                                    Shadow(
-                                      offset: Offset(1, 1),
-                                      blurRadius: 2,
-                                      color: Colors.black54,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+        child: Stack(
+          children: [
+            // Main layout
+            Column(
+              children: [
+                // Main content area (top)
+                Expanded(flex: 2, child: Center(child: _buildMainContent())),
 
-              // Piano input widget (bottom)
-              Expanded(
-                flex: 2,
-                child: Container(
-                  margin: const EdgeInsets.all(8),
+                // Piano input widget (bottom)
+                Expanded(
                   child: BraillePianoWidget(onSubmitInput: _submitCurrentInput),
                 ),
+              ],
+            ),
+
+            // Gesture detector overlay covering only the top area (excluding piano)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom:
+                  MediaQuery.of(context).size.height /
+                  3, // Leave bottom third for piano
+              child: SwipeGestureDetector(
+                onSwipeLeftThreeFingers: () {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const PhotoVibroScreen(),
+                    ),
+                  );
+                },
+                onSwipeRightThreeFingers: () {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const SpeechVibroScreen(),
+                    ),
+                  );
+                },
+                onSwipeUpThreeFingers: () async {
+                  if (!_isSpeaking) {
+                    _isSpeaking = true;
+                    try {
+                      await _askAssistant();
+                    } catch (e) {
+                      _loggingService.error('Error asking assistant: $e');
+                    } finally {
+                      _isSpeaking = false;
+                    }
+                  }
+                },
+                onSwipeDownThreeFingers: () async {
+                  if (!_isSpeaking) {
+                    _isSpeaking = true;
+                    try {
+                      await _speakText();
+                    } catch (e) {
+                      _loggingService.error('Error speaking text: $e');
+                    } finally {
+                      _isSpeaking = false;
+                    }
+                  }
+                },
+                onTap: () {
+                  // Delete functionality - tap anywhere to delete
+                  _handleBackspace();
+                },
+                onLongPress: () {
+                  // Clear all text - three finger tap to clear all
+                  _handleClearAll();
+                },
+                child: Container(
+                  // Transparent container that covers only the top area
+                  color: Colors.transparent,
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _buildMainContent() {
+    switch (_currentState) {
+      case BrailleInputState.ready:
+        return IconTextWidget(
+          svgIcon: IconPaths.keyboard,
+          text: _displayText,
+          iconColor: Colors.grey,
+          textColor: Colors.grey,
+        );
+      case BrailleInputState.processingTransform:
+        return IconTextWidget(
+          imageIcon: IconPaths.gemma3n,
+          text: 'Decoding',
+          textColor: Colors.white,
+        );
+      case BrailleInputState.processingOutput:
+        return IconTextWidget(
+          svgIcon: IconPaths.speak2,
+          text: 'Speaking...',
+          iconColor: Colors.green,
+          textColor: Colors.green,
+        );
+      case BrailleInputState.processingAssistant:
+        return IconTextWidget(
+          imageIcon: IconPaths.gemma3n,
+          text: 'Preparing answer',
+          textColor: Colors.white,
+        );
+    }
   }
 }

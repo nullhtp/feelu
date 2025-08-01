@@ -13,7 +13,7 @@ class BraillePianoKey extends StatefulWidget {
     required this.label,
     required this.onPressed,
     this.isPressed = false,
-    this.keyColor = Colors.white,
+    this.keyColor = Colors.transparent,
     this.pressedColor = Colors.blue,
     this.isSpaceKey = false,
   });

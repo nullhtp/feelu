@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/domain/braille_code_map.dart';
 import '../../core/domain/braille_symbol.dart';
 import '../../core/services/services.dart';
+import '../../core/widgets/swipe_gesture_detector.dart';
 import 'widgets/braille_text_widget.dart';
 
 class BrailleFullscreenScreen extends StatefulWidget {
@@ -74,65 +75,18 @@ class _BrailleFullscreenScreenState extends State<BrailleFullscreenScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: GestureDetector(
-          // Full-screen gesture detection following app patterns
-          onPanUpdate: (details) {
-            const double swipeThreshold = 5.0;
-
-            // Swipe left to go back (consistent with other screens)
-            if (details.delta.dx < -swipeThreshold) {
-              _navigateBack();
-            }
-          },
+        child: SwipeGestureDetector(
+          // Four-finger swipe navigation for accessibility
+          onSwipeDownThreeFingers: _navigateBack,
           child: Column(
             children: [
               // Minimal status bar for screen readers
-              _buildStatusBar(),
 
               // Main braille display area (maximized for touch)
               Expanded(child: _buildBrailleDisplayArea()),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildStatusBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          // Source indicator
-          Icon(
-            Icons.visibility,
-            color: Colors.white70,
-            size: 16,
-            semanticLabel: widget.sourceTitle,
-          ),
-          const SizedBox(width: 8),
-
-          // Status text
-          Expanded(
-            child: Text(
-              'BRAILLE ACTIVE',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
-              ),
-              semanticsLabel: 'Braille display active',
-            ),
-          ),
-
-          // Character count
-          Text(
-            '${widget.sourceText.length} chars',
-            style: TextStyle(color: Colors.white70, fontSize: 12),
-            semanticsLabel: '${widget.sourceText.length} characters',
-          ),
-        ],
       ),
     );
   }
@@ -144,10 +98,6 @@ class _BrailleFullscreenScreenState extends State<BrailleFullscreenScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.black,
-        border: Border.all(
-          color: widget.themeColor.withValues(alpha: 0.3),
-          width: 2,
-        ),
         borderRadius: BorderRadius.circular(12),
       ),
       child: BrailleTextWidget(

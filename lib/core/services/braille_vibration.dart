@@ -16,8 +16,6 @@ class BrailleVibrationService implements IBrailleVibrationService {
     for (final char in data.toLowerCase().split('')) {
       final braille = charToBraille[char] ?? '000000';
       await _vibrateBrailleSymbol(braille);
-      // Small pause between symbols
-      await Future.delayed(const Duration(milliseconds: 100));
     }
   }
 
@@ -28,7 +26,7 @@ class BrailleVibrationService implements IBrailleVibrationService {
     final secondHalf = braille.substring(3, 6);
     await vibrateBrailleHalf(firstHalf);
     // Short pause between halves
-    await Future.delayed(const Duration(milliseconds: 60));
+    await Future.delayed(const Duration(milliseconds: 500));
     await vibrateBrailleHalf(secondHalf);
   }
 
@@ -46,10 +44,10 @@ class BrailleVibrationService implements IBrailleVibrationService {
       1: [40, 200], // 001
       2: [120, 200], // 010
       3: [255, 200], // 011
-      4: [40, 500], // 100
-      5: [120, 500], // 101
-      6: [255, 500], // 110
-      7: [255, 1000], // 111
+      4: [40, 400], // 100
+      5: [120, 400], // 101
+      6: [255, 400], // 110
+      7: [255, 700], // 111
     };
     final pattern = patternMap[bits];
     if (pattern == null) {
@@ -57,6 +55,5 @@ class BrailleVibrationService implements IBrailleVibrationService {
     }
 
     await Vibration.vibrate(duration: pattern.last, amplitude: pattern.first);
-    await Future.delayed(const Duration(milliseconds: 500));
   }
 }

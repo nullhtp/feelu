@@ -46,6 +46,7 @@ dependencies:
   speech_to_text: ^7.2.0
   camera: ^0.11.0+2
   get_it: ^7.6.4
+  flutter_svg: ^2.0.10+1
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +73,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
+    - assets/icons/
   # Note: Large model files should NOT be included as Flutter assets
   # They should be downloaded at runtime or loaded from external storage
 

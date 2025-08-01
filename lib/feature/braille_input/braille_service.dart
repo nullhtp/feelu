@@ -92,13 +92,13 @@ class BrailleService implements IBrailleService {
   /// Remove last character or reset current input
   @override
   void backspace() {
-    if (!isFirstHalf && (firstHalf.isNotEmpty || secondHalf.isNotEmpty)) {
-      // If we're in the middle of input, reset current input
+    // If we have partial input in progress, clear it
+    if (firstHalf.isNotEmpty || secondHalf.isNotEmpty) {
+      // Reset current partial input
       _reset();
     } else if (outputText.isNotEmpty) {
-      // Remove last character
+      // Remove last completed character
       outputText.removeLast();
-      _reset();
     }
   }
 }

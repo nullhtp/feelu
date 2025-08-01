@@ -126,7 +126,6 @@ class _SwipeGestureDetectorState extends State<SwipeGestureDetector> {
         }
       },
       child: GestureDetector(
-        onTap: widget.onTap,
         onLongPress: widget.onLongPress,
         behavior: HitTestBehavior.translucent,
         child: widget.child,

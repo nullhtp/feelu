@@ -55,6 +55,9 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
   void initState() {
     super.initState();
 
+    // Initialize display text with current service state
+    _displayText = _brailleService.getDisplayText();
+
     // BrailleTextOutputService needs context
     _brailleTextOutputService = BrailleTextOutputService(context: context);
 

@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../core/di/service_locator.dart';
+import '../../core/widgets/swipe_gesture_detector.dart';
 import '../braille_input/braille_input_screen.dart';
 import 'speech_vibro_service.dart';
-import 'widgets/speech_vibro_gesture_detector.dart';
 import 'widgets/status_indicator_widget.dart';
 
 class SpeechVibroScreen extends StatefulWidget {
@@ -68,16 +68,12 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: SpeechVibroGestureDetector(
+        child: SwipeGestureDetector(
           onSwipeLeft: _navigateToBrailleInput,
-          onSwipeDown: () {},
-          onSwipeUp: () {}, // Remove swipe up to listen functionality
-          child: GestureDetector(
-            onTap: _startListening,
-            child: StatusIndicatorWidget(
-              isListening: _currentState == SpeechVibroState.listening,
-              isProcessing: _currentState == SpeechVibroState.processing,
-            ),
+          onTap: _startListening,
+          child: StatusIndicatorWidget(
+            isListening: _currentState == SpeechVibroState.listening,
+            isProcessing: _currentState == SpeechVibroState.processing,
           ),
         ),
       ),

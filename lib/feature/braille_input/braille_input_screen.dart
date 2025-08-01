@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/di/service_locator.dart';
 import '../../core/interfaces.dart';
 import '../../core/services/services.dart';
+import '../../core/widgets/swipe_gesture_detector.dart';
 import '../../feature/braille_fullscreen/braille_fullscreen_screen.dart';
 import '../../feature/photo_vibro/photo_vibro_screen.dart';
 import '../../feature/speech_vibro/speech_vibro_screen.dart';
@@ -130,23 +131,23 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: GestureDetector(
-          // Add swipe down detection for the entire screen
-          onPanUpdate: (details) async {
-            // Check if swipe is moving downward and not already speaking
-            if (details.delta.dy > 5 && !_isSpeaking) {
+        child: SwipeGestureDetector(
+          onSwipeLeft: () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const PhotoVibroScreen()),
+            );
+          },
+          onSwipeRight: () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const SpeechVibroScreen(),
+              ),
+            );
+          },
+          onSwipeUp: () async {
+            if (!_isSpeaking) {
+              _isSpeaking = true;
               try {
-                _isSpeaking = true;
-                await _speakText();
-              } catch (e) {
-                _loggingService.error('Error speaking text: $e');
-              } finally {
-                _isSpeaking = false;
-              }
-            }
-            if (details.delta.dy < -5 && !_isSpeaking) {
-              try {
-                _isSpeaking = true;
                 await _askAssistant();
               } catch (e) {
                 _loggingService.error('Error asking assistant: $e');
@@ -154,21 +155,17 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
                 _isSpeaking = false;
               }
             }
-            // Swipe right to navigate to speech vibro screen
-            if (details.delta.dx > 5) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => const SpeechVibroScreen(),
-                ),
-              );
-            }
-            // Swipe left to navigate to photo vibro screen
-            if (details.delta.dx < -5) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => const PhotoVibroScreen(),
-                ),
-              );
+          },
+          onSwipeDown: () async {
+            if (!_isSpeaking) {
+              _isSpeaking = true;
+              try {
+                await _speakText();
+              } catch (e) {
+                _loggingService.error('Error speaking text: $e');
+              } finally {
+                _isSpeaking = false;
+              }
             }
           },
           child: Column(

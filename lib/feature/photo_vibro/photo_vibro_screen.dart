@@ -6,9 +6,10 @@ import '../../core/di/service_locator.dart';
 import '../../core/services/camera_service.dart';
 import '../../core/widgets/icon_paths.dart';
 import '../../core/widgets/icon_text_widget.dart';
+import '../../core/widgets/swipe_gesture_detector.dart';
 import '../braille_input/braille_input_screen.dart';
 import 'photo_vibro_service.dart';
-import 'widgets/widgets.dart';
+import 'widgets/camera_preview_widget.dart';
 
 class PhotoVibroScreen extends StatefulWidget {
   const PhotoVibroScreen({super.key});
@@ -95,7 +96,7 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: PhotoVibroGestureDetector(
+        child: SwipeGestureDetector(
           onSwipeRight: _navigateToBrailleInput,
           onSwipeDown: () {},
           onTap: _capturePhoto,

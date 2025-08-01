@@ -12,11 +12,6 @@ class CameraPreviewWidget extends StatelessWidget {
       return Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.grey.shade900,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white30, width: 2),
-        ),
         child: const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -40,10 +35,6 @@ class CameraPreviewWidget extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white30, width: 2),
-      ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: CameraPreview(cameraController!),

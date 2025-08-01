@@ -15,6 +15,7 @@ class SpeechRecognitionService implements ISpeechRecognitionService {
   final SpeechToText _speechToText = SpeechToText();
   bool _isInitialized = false;
   bool _isListening = false;
+  bool _isError = false;
   final ILoggingService _loggingService = ServiceLocator.get<ILoggingService>();
 
   // Getters
@@ -27,6 +28,7 @@ class SpeechRecognitionService implements ISpeechRecognitionService {
       _isInitialized = await _speechToText.initialize(
         onError: (error) {
           _loggingService.error('Speech recognition error: ${error.errorMsg}');
+          _isError = true;
         },
         onStatus: (status) {
           _loggingService.debug('Speech recognition status: $status');
@@ -52,6 +54,7 @@ class SpeechRecognitionService implements ISpeechRecognitionService {
 
     try {
       _isListening = true;
+      _isError = false;
 
       String recognizedText = '';
       String lastRecognizedText = '';
@@ -98,7 +101,7 @@ class SpeechRecognitionService implements ISpeechRecognitionService {
       );
 
       // Custom loop to handle 3-second silence detection
-      while (shouldContinue) {
+      while (shouldContinue && !_isError) {
         await Future.delayed(const Duration(milliseconds: 500));
 
         // Check if it's been more than 3 seconds since last text update

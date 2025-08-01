@@ -68,13 +68,28 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: SwipeGestureDetector(
-          onSwipeLeft: _navigateToBrailleInput,
-          onTap: _startListening,
-          child: StatusIndicatorWidget(
-            isListening: _currentState == SpeechVibroState.listening,
-            isProcessing: _currentState == SpeechVibroState.processing,
-          ),
+        child: Stack(
+          children: [
+            // Full screen gesture detector
+            Positioned.fill(
+              child: SwipeGestureDetector(
+                onSwipeLeft: _navigateToBrailleInput,
+                onTap: _startListening,
+                child: Container(
+                  color: Colors.transparent,
+                  child: Center(
+                    child: StatusIndicatorWidget(
+                      isListening: _currentState == SpeechVibroState.listening,
+                      isProcessing:
+                          _currentState == SpeechVibroState.processing,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // Centered status indicator
+          ],
         ),
       ),
     );

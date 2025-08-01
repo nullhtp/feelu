@@ -132,12 +132,12 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
       backgroundColor: Colors.black,
       body: SafeArea(
         child: SwipeGestureDetector(
-          onSwipeLeft: () {
+          onSwipeLeftThreeFingers: () {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => const PhotoVibroScreen()),
             );
           },
-          onSwipeRight: () {
+          onSwipeRightThreeFingers: () {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => const SpeechVibroScreen(),

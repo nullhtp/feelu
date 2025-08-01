@@ -73,7 +73,7 @@ class _SpeechVibroScreenState extends State<SpeechVibroScreen>
             // Full screen gesture detector
             Positioned.fill(
               child: SwipeGestureDetector(
-                onSwipeLeft: _navigateToBrailleInput,
+                onSwipeLeftThreeFingers: _navigateToBrailleInput,
                 onTap: _startListening,
                 child: Container(
                   color: Colors.transparent,

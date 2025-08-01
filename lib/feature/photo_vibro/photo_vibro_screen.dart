@@ -97,8 +97,7 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen> {
       backgroundColor: Colors.black,
       body: SafeArea(
         child: SwipeGestureDetector(
-          onSwipeRight: _navigateToBrailleInput,
-          onSwipeDown: () {},
+          onSwipeRightThreeFingers: _navigateToBrailleInput,
           onTap: _capturePhoto,
           child: Stack(
             children: [

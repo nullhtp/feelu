@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/widgets/icon_paths.dart';
-import '../../../../core/widgets/icon_text_widget.dart';
+import '../../../core/widgets/icon_paths.dart';
+import '../../../core/widgets/icon_text_widget.dart';
 
 class StatusIndicatorWidget extends StatelessWidget {
   final bool isListening;

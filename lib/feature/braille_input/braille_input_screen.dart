@@ -144,7 +144,7 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
               ),
             );
           },
-          onSwipeUp: () async {
+          onSwipeUpThreeFingers: () async {
             if (!_isSpeaking) {
               _isSpeaking = true;
               try {
@@ -156,7 +156,7 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
               }
             }
           },
-          onSwipeDown: () async {
+          onSwipeDownThreeFingers: () async {
             if (!_isSpeaking) {
               _isSpeaking = true;
               try {

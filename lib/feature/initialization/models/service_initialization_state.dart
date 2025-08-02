@@ -7,6 +7,7 @@ class ServiceInitializationState {
   String? errorMessage;
   String? fixInstructions;
   double? progress;
+  Future<bool> Function(int index)? initiator;
 
   ServiceInitializationState({
     required this.name,
@@ -15,6 +16,7 @@ class ServiceInitializationState {
     this.errorMessage,
     this.fixInstructions,
     this.progress,
+    this.initiator,
   });
 
   ServiceInitializationState copyWith({
@@ -24,6 +26,7 @@ class ServiceInitializationState {
     String? errorMessage,
     String? fixInstructions,
     double? progress,
+    Future<bool> Function(int index)? initiator,
   }) {
     return ServiceInitializationState(
       name: name ?? this.name,
@@ -32,6 +35,7 @@ class ServiceInitializationState {
       errorMessage: errorMessage ?? this.errorMessage,
       fixInstructions: fixInstructions ?? this.fixInstructions,
       progress: progress ?? this.progress,
+      initiator: initiator ?? this.initiator,
     );
   }
 

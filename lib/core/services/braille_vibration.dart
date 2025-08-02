@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:vibration/vibration.dart';
 
@@ -56,4 +57,81 @@ class BrailleVibrationService implements IBrailleVibrationService {
 
     await Vibration.vibrate(duration: pattern.last, amplitude: pattern.first);
   }
+}
+
+class BrailleAudioService implements IBrailleVibrationService {
+  BrailleAudioService() {
+    _init(); // fire-and-forget; no await needed here
+  }
+
+  static const _beepAsset =
+      'audio/beep.wav'; // path relative to pubspec asset list
+  final AudioPlayer _player = AudioPlayer();
+
+  bool _ready = false;
+
+  Future<void> _init() async {
+    // Pre-cache once so later playbacks have zero lag
+    await _player.setSource(AssetSource(_beepAsset));
+    await _player.setReleaseMode(ReleaseMode.stop);
+    _ready = true;
+  }
+
+  @override
+  Future<void> vibrateBraille(String data) async {
+    for (final char in data.toLowerCase().split('')) {
+      final braille = charToBraille[char] ?? '000000';
+      await _playBrailleSymbol(braille);
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+  }
+
+  Future<void> _playBrailleSymbol(String braille) async {
+    if (braille.length != 6) return;
+    await _playBrailleHalf(braille.substring(0, 3));
+    await Future.delayed(const Duration(milliseconds: 60));
+    await _playBrailleHalf(braille.substring(3, 6));
+  }
+
+  Future<void> _playBrailleHalf(String half) async {
+    // 000 → quiet click so timing stays consistent
+    if (half == '000') {
+      await _playBeep(volume: 0.2, duration: 60);
+      return;
+    }
+    const map = <int, List<int>>{
+      1: [40, 200],
+      2: [120, 200],
+      3: [255, 200],
+      4: [40, 500],
+      5: [120, 500],
+      6: [255, 500],
+      7: [255, 1000],
+    };
+
+    final bits = int.parse(half, radix: 2);
+    final pattern = map[bits];
+    if (pattern == null) return;
+
+    await _playBeep(
+      volume: pattern[0] / 255.0, // to 0-1
+      duration: pattern[1],
+    );
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
+
+  Future<void> _playBeep({
+    required double volume,
+    required int duration,
+  }) async {
+    if (!_ready) await _init();
+
+    await _player.setVolume(volume.clamp(0.0, 1.0));
+    await _player.seek(Duration.zero); // rewind
+    await _player.resume(); // play
+    await Future.delayed(Duration(milliseconds: duration));
+    await _player.pause(); // DON’T stop → keeps buffer in RAM
+  }
+
+  Future<void> dispose() => _player.dispose();
 }

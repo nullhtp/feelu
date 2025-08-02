@@ -73,6 +73,12 @@ Install these essential extensions for Flutter development:
    ```
    Fix any issues reported by `flutter doctor`.
 
+5. **Configure env variables:**
+   ```bash
+   # Copy the example .env and edit it
+   cp .env.example .env
+   ```
+
 
 ### Running the Project
 

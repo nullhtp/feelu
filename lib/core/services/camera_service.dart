@@ -12,6 +12,7 @@ abstract class ICameraService {
   Future<bool> initialize();
   Future<void> dispose();
   Future<Uint8List?> captureImage();
+  bool get isCameraReady;
 }
 
 class CameraService implements ICameraService {
@@ -23,6 +24,7 @@ class CameraService implements ICameraService {
 
   // Getters
   bool get isInitialized => _isInitialized;
+  @override
   bool get isCameraReady =>
       _isInitialized && (_cameraController?.value.isInitialized ?? false);
 
@@ -98,6 +100,15 @@ class CameraService implements ICameraService {
         'CameraService: Image captured successfully (${imageBytes.length} bytes)',
       );
 
+      // ── FLUSH CAMERA PIPELINE ──
+      // 1. stop preview so the hidden ImageReader can empty its queue
+      // 2. give Android ~1 video frame (100 ms) to finish
+      // 3. resume so the view stays live if the page is still open
+      await _cameraController!.unlockCaptureOrientation(); // no-op on iOS
+      await _cameraController!.pausePreview(); // flush frames
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      await _cameraController!.resumePreview();
+
       return imageBytes;
     } catch (e) {
       final errorMsg = 'Failed to capture image: ${e.toString()}';
@@ -109,6 +120,11 @@ class CameraService implements ICameraService {
   @override
   Future<void> dispose() async {
     try {
+      // Stop preview first so no new frames appear after dispose
+      if (_cameraController?.value.isInitialized ?? false) {
+        await _cameraController!.pausePreview();
+      }
+
       await _cameraController?.dispose();
       _cameraController = null;
       _isInitialized = false;

@@ -1,3 +1,5 @@
+import 'package:feelu/env/env.dart';
+
 import '../../feature/braille_input/braille_service.dart';
 import '../../feature/initialization/initialization_service.dart';
 import '../../feature/photo_vibro/photo_vibro_service.dart';
@@ -22,9 +24,15 @@ class ServiceRegistration {
   /// Register core services
   static Future<void> registerCoreServices() async {
     // Braille vibration service
-    ServiceLocator.registerLazySingleton<IBrailleVibrationService>(
-      () => BrailleVibrationService(),
-    );
+    if (!Env.disableVibration()) {
+      ServiceLocator.registerLazySingleton<IBrailleVibrationService>(
+        () => BrailleVibrationService(),
+      );
+    } else {
+      ServiceLocator.registerLazySingleton<IBrailleVibrationService>(
+        () => BrailleAudioService(),
+      );
+    }
 
     // New AppConfig service (DI-friendly)
     ServiceLocator.registerLazySingleton<AppConfig>(() => AppConfig());
@@ -72,7 +80,11 @@ class ServiceRegistration {
     ServiceLocator.registerLazySingleton<IBrailleService>(
       () => BrailleService(),
     );
-    ServiceLocator.registerLazySingleton<IPhotoVibroService>(
+    // ServiceLocator.registerLazySingleton<IPhotoVibroService>(
+    //   () => PhotoVibroService(),
+    // );
+    // Register transient
+    ServiceLocator.registerFactory<IPhotoVibroService>(
       () => PhotoVibroService(),
     );
     ServiceLocator.registerLazySingleton<ISpeechVibroService>(

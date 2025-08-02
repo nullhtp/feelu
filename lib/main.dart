@@ -1,6 +1,7 @@
 import 'package:feelu/feature/initialization/initialization_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'core/di/service_locator.dart';
@@ -8,6 +9,9 @@ import 'core/di/service_registration.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load .env file only if it exists
+  await dotenv.load(fileName: '.env');
 
   // Initialize dependency injection
   await ServiceLocator.init();

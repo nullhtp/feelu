@@ -30,7 +30,6 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen> {
   @override
   void initState() {
     super.initState();
-
     // Get services from DI container
     _photoVibroService = ServiceLocator.get<IPhotoVibroService>();
     _cameraService = ServiceLocator.get<ICameraService>();
@@ -42,6 +41,13 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen> {
   Future<void> _initializeService() async {
     try {
       await _photoVibroService.initialize(context);
+
+      if (!_cameraService.isCameraReady) {
+        await _cameraService.initialize();
+        if (mounted) {
+          setState(() {});
+        }
+      }
     } catch (e) {
       _showError('Failed to initialize photo vibro: ${e.toString()}');
     }
@@ -85,6 +91,9 @@ class _PhotoVibroScreenState extends State<PhotoVibroScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _cameraService.dispose(); // the service from ServiceLocator
+    });
     _stateSubscription.cancel();
     _errorSubscription.cancel();
     _photoVibroService.dispose();

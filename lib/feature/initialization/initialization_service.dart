@@ -53,28 +53,41 @@ class InitializationService implements IInitializationService {
   }
 
   void _initializeServices() {
-    _services = [
+    _services.add(
       ServiceInitializationState(
         name: 'Vibration Service',
         description: 'Checking device vibration capabilities',
+        initiator: _initializeVibrationService,
       ),
+    );
+    _services.add(
       ServiceInitializationState(
         name: 'Camera Service',
         description: 'Initializing camera for photo recognition',
+        initiator: _initializeCameraService,
       ),
+    );
+    _services.add(
       ServiceInitializationState(
         name: 'Text-to-Speech',
         description: 'Initializing speech synthesis engine',
+        initiator: _initializeTtsService,
       ),
+    );
+    _services.add(
       ServiceInitializationState(
         name: 'Speech Recognition',
         description: 'Initializing speech recognition engine',
+        initiator: _initializeSpeechRecognitionService,
       ),
+    );
+    _services.add(
       ServiceInitializationState(
         name: 'Gemma AI Model',
         description: 'Loading AI model for braille translation',
+        initiator: _initializeGemmaService,
       ),
-    ];
+    );
   }
 
   @override
@@ -110,20 +123,12 @@ class InitializationService implements IInitializationService {
 
   Future<bool> _initializeService(int index) async {
     try {
-      switch (index) {
-        case 0:
-          return await _initializeVibrationService(index);
-        case 1:
-          return await _initializeCameraService(index);
-        case 2:
-          return await _initializeTtsService(index);
-        case 3:
-          return await _initializeSpeechRecognitionService(index);
-        case 4:
-          return await _initializeGemmaService(index);
-        default:
-          return false;
+      final initiator = _services[index].initiator;
+      if (initiator != null) {
+        return await initiator(index);
       }
+
+      return false;
     } catch (e) {
       _updateServiceError(index, e.toString());
       return false;

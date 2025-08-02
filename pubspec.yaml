@@ -43,10 +43,13 @@ dependencies:
   wakelock_plus: ^1.2.8
   vibration: ^2.0.0
   flutter_tts: ^4.2.0
-  speech_to_text: ^7.2.0
   camera: ^0.11.0+2
   get_it: ^7.6.4
   flutter_svg: ^2.0.10+1
+  speech_to_text: 7.1.0
+  flutter_dotenv: ^5.1.0
+  device_info_plus: ^10.0.0
+  audioplayers: ^6.5.0
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +77,7 @@ flutter:
   assets:
     - assets/
     - assets/icons/
+    - .env
   # Note: Large model files should NOT be included as Flutter assets
   # They should be downloaded at runtime or loaded from external storage
 

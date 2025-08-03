@@ -153,6 +153,8 @@ This feature provides a dedicated fullscreen interface for reading text in Brail
 
 ## Braille-vibration Guide
 
+![Braille-vibration output](_docs/braille-output.png)
+
 FeelU uses sophisticated vibration patterns to provide feedback and information:
 
 ### Braille Vibration Patterns:

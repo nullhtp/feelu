@@ -39,6 +39,8 @@ FeelU is an Android application specifically designed to help deaf-blind individ
 
 ### 1. Braille Input Screen (Main Hub)
 
+![Braille Input Screen](_docs/input-screen.jpg)
+
 This is the central screen where you can input text using Braille and navigate to other features.
 
 #### Layout:
@@ -69,6 +71,8 @@ This is the central screen where you can input text using Braille and navigate t
 
 ### 2. Photo Vibro Screen (Camera Mode)
 
+![Photo Vibro Screen](_docs/camera-screen.jpg)
+
 This feature allows you to take photos and receive AI-generated descriptions of what's in the image.
 
 #### How to Use:
@@ -88,6 +92,8 @@ This feature allows you to take photos and receive AI-generated descriptions of 
 - **3-finger swipe right**: Return to Braille Input screen
 
 ### 3. Speech Vibro Screen (Voice Mode)
+
+![Speech Vibro Screen](_docs/listen-screen.jpg)
 
 This feature enables speech recognition and converts spoken words into text with haptic feedback.
 
@@ -118,6 +124,8 @@ Access the AI assistant for questions and help.
 4. Responses are delivered through Braille-vibration output
 
 ### 5. Braille Fullscreen Mode
+
+![Braille Fullscreen Mode](_docs/read-screen.jpg)
 
 This feature provides a dedicated fullscreen interface for reading text in Braille format through touch and vibration.
 

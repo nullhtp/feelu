@@ -104,10 +104,10 @@ class CameraService implements ICameraService {
       // 1. stop preview so the hidden ImageReader can empty its queue
       // 2. give Android ~1 video frame (100 ms) to finish
       // 3. resume so the view stays live if the page is still open
-      await _cameraController!.unlockCaptureOrientation(); // no-op on iOS
-      await _cameraController!.pausePreview(); // flush frames
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      await _cameraController!.resumePreview();
+      // await _cameraController!.unlockCaptureOrientation(); // no-op on iOS
+      // await _cameraController!.pausePreview(); // flush frames
+      // await Future<void>.delayed(const Duration(milliseconds: 100));
+      // await _cameraController!.resumePreview();
 
       return imageBytes;
     } catch (e) {

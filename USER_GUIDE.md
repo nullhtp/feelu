@@ -151,38 +151,6 @@ This feature provides a dedicated fullscreen interface for reading text in Brail
 
 ---
 
-## Braille-vibration Guide
-
-![Braille-vibration output](_docs/braille-output.png)
-
-FeelU uses sophisticated vibration patterns to provide feedback and information:
-
-### Braille Vibration Patterns:
-- Each Braille character is transmitted through vibration
-- First half of character followed by a pause, then second half
-- Different intensities and durations represent different dot patterns:
-  - **001**: Light vibration, 200ms
-  - **010**: Medium vibration, 200ms  
-  - **100**: Strong vibration, 200ms
-  - **011**: Light vibration, 400ms
-  - **101**: Medium vibration, 400ms
-  - **110**: Strong vibration, 400ms
-  - **111**: Strong vibration, 700ms
-  - **000**: Light haptic tap
-
-### System Feedback:
-- **Info**: Single short vibration
-- **Warning**: Double burst pattern (100ms-100ms-200ms-200ms)
-- **Error**: Rapid repeating pattern (10 pulses of 100ms each)
-- **Notification**: Single 100ms vibration
-
-### Input Feedback:
-- **Heavy Impact**: When entering first half of Braille character
-- **Light Impact**: For space/empty inputs
-- **Completion**: When character is successfully recognized
-
----
-
 ## AI Features
 
 ### Image Recognition:

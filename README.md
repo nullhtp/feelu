@@ -9,7 +9,7 @@
 - 📳 **Haptic Output**: Vibration-based Braille you can feel
 
 [User Guide](./USER_GUIDE.md)  
-[Vibro-Braille System Details](./VIBRO_BRAILLE_GUIDE.md)
+[Vibro-Braille System Details](./VIBRO_BRAILLE_GUIDE.md)  
 [Development Guide](./DEVELOPMENT.md)
 
 ## 🧩 Core Features

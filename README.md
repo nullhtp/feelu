@@ -8,9 +8,9 @@
 - 🔡 **Braille Input**: Piano-style 6-dot entry
 - 📳 **Haptic Output**: Vibration-based Braille you can feel
 
-📖 [User Guide](./USER_GUIDE.md)  
-📖 [Vibro-Braille System Details](./VIBRO_BRAILLE_GUIDE.md)
-📖 [Development Guide](./DEVELOPMENT.md)
+[User Guide](./USER_GUIDE.md)  
+[Vibro-Braille System Details](./VIBRO_BRAILLE_GUIDE.md)
+[Development Guide](./DEVELOPMENT.md)
 
 ## 🧩 Core Features
 
@@ -24,7 +24,7 @@
 
 ## 🚀 Quick Start
 
-1. **Install and launch** the APK
+1. **Install and launch** the [APK](https://github.com/nullhtp/feelu/releases)
 2. On first run, the app auto-initializes:
    - On-device AI (no cloud required)
    - Vibration + audio models

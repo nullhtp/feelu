@@ -107,11 +107,6 @@ Each Braille character (6-dot) is split into two 3-dot phases, encoded as binary
 - 🕓 Conversation history
 - 🎛 Swipe-based virtual input screen
 
-## 📚 Documentation
-
-- [User Guide](./USER_GUIDE.md)  
-- [Vibro-Braille System](./VIBRO_BRAILLE_GUIDE.md)
-
 ## 🤝 Contribute
 
 We welcome contributors passionate about accessibility:

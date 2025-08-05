@@ -1,4 +1,4 @@
-# FeelU - User Guide
+# User Guide
 
 ## Overview
 
@@ -13,8 +13,6 @@ FeelU is an Android application specifically designed to help deaf-blind individ
 - **AI Assistant**: Personal assistant for questions and help
 - **Multi-finger Gesture Navigation**: Accessible navigation between app features
 - **Braille Text System**: Interface for reading text in Braille format through touch and vibration
-
----
 
 ## Getting Started
 
@@ -33,8 +31,6 @@ FeelU is an Android application specifically designed to help deaf-blind individ
 - The device will automatically lock to landscape orientation when the app starts
 - The app keeps your screen awake to prevent interruptions during use
 
----
-
 ## Main Features Guide
 
 ### 1. Braille Input Screen (Main Hub)
@@ -52,6 +48,9 @@ This is the central screen where you can input text using Braille and navigate t
 - **Space Key**: Represents empty input (dots 4, 5, 6 set to zero)
 
 #### How to Input Braille:
+
+![Braille Input Concept](_docs/braille-input.png)
+
 1. **First Half**: Press combination of the 3 main keys or space for the first half of the Braille character
 2. **Second Half**: Press combination of the 3 main keys or space for the second half of the Braille character
 3. The app automatically combines both halves to form a complete Braille character
@@ -149,8 +148,6 @@ This feature provides a dedicated fullscreen interface for reading text in Brail
 - **Vibration Feedback**: Each character produces its unique Braille vibration pattern
 - **Position Detection**: Automatically detects which character you're touching
 
----
-
 ## AI Features
 
 ### Image Recognition:
@@ -168,8 +165,6 @@ This feature provides a dedicated fullscreen interface for reading text in Brail
 - All AI processing happens locally on your device
 - No data is sent to external servers
 - Requires one-time download of AI models
-
----
 
 ## Troubleshooting
 
@@ -205,8 +200,6 @@ This feature provides a dedicated fullscreen interface for reading text in Brail
 - Use the AI Assistant (3-finger swipe up) for quick help
 - Check that all device permissions are properly granted
 - Restart the app if services fail to initialize
-
----
 
 ## Technical Requirements
 

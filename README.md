@@ -1,260 +1,124 @@
-# Feelu - Flutter Project
+# FeelU: AI + Braille-Vibration Communication for Deaf-Blind Users
 
-A Flutter application designed to facilitate communication between blind and deaf people with the outside world.
+## 📘 Overview
 
-## VS Code Setup Instructions
+**FeelU** is an innovative Android app designed to empower **deaf-blind individuals** with real-time communication and environmental awareness through:
 
-### Prerequisites
+- 🧠 **On-device AI**: Image and speech recognition without internet
+- 🔡 **Braille Input**: Piano-style 6-dot entry
+- 📳 **Haptic Output**: Vibration-based Braille you can feel
 
-Before working with this project in VS Code, ensure you have the following installed:
+📖 [User Guide](./USER_GUIDE.md)  
+📖 [Vibro-Braille System Details](./VIBRO_BRAILLE_GUIDE.md)
+📖 [Development Guide](./DEVELOPMENT.md)
 
-1. **Flutter SDK** (latest stable version)
-   - Download from [flutter.dev](https://docs.flutter.dev/get-started/install)
-   - Add Flutter to your PATH
-   - Verify installation: `flutter doctor`
+## 🧩 Core Features
 
-2. **Visual Studio Code**
-   - Download from [code.visualstudio.com](https://code.visualstudio.com/)
+- 🎹 **Braille Input**: Two-step, piano-style 6-dot keyboard
+- 📳 **Vibro-Braille Output**: Custom dual-phase vibration patterns for Braille characters
+- 📷 **AI Camera Mode**: Detects and describes nearby objects via Braille vibration
+- 🗣️ **Speech-to-Braille**: Converts nearby speech into tactile Braille output
+- 🤖 **Q&A Mode**: Enter questions via Braille; receive answers via vibration
+- 📄 **Fullscreen Braille Reader**: Slide/tap to read long responses
+- ✋ **Gesture Navigation**: Simple 3-finger swipes to switch modes
 
-3. **Platform-specific requirements:**
-   - **Android**: Android Studio or Android SDK + Android SDK Command-line Tools
-   - **iOS** (macOS only): Xcode
+## 🚀 Quick Start
 
-### Required VS Code Extensions
+1. **Install and launch** the APK
+2. On first run, the app auto-initializes:
+   - On-device AI (no cloud required)
+   - Vibration + audio models
+3. Rotate device to **landscape** (auto-locked)
+4. Starts in **Braille Input** mode
 
-Install these essential extensions for Flutter development:
+## 🧭 Mode Navigation
 
-1. **Flutter** (by Dart Code)
-   - Provides Flutter support, debugging, and hot reload
-   - Install: `ext install Dart-Code.flutter`
+| Mode | Gesture | Purpose |
+|------|---------|---------|
+| **Braille Input** | Default | Enter text in Braille |
+| **Camera Mode** | Swipe **left** | Recognize surroundings |
+| **Speech Mode** | Swipe **right** | Transcribe speech to Braille |
+| **Q&A Mode** | Swipe **up** | Ask AI questions via Braille |
+| **Text-to-Speech** | Swipe **down** | Speak your input aloud |
+| **Fullscreen Reader** | Auto-opens | Read full responses via swipe/tap |
 
-2. **Dart** (by Dart Code)
-   - Usually installed automatically with Flutter extension
-   - Install: `ext install Dart-Code.dart-code`
+## 📳 How Vibro-Braille Works
 
-3. **Recommended additional extensions:**
-   - **Error Lens**: Real-time error highlighting
-   - **Bracket Pair Colorizer 2**: Better bracket matching
-   - **GitLens**: Enhanced Git capabilities
-   - **Todo Highlight**: Highlight TODO comments
-   - **Flutter Widget Snippets**: Quick widget creation
+Each Braille character (6-dot) is split into two 3-dot phases, encoded as binary and rendered as distinct vibration sequences.
 
-### Project Setup
+### 🔢 Encoding Example
 
-1. **Clone and open the project:**
-   ```bash
-   git clone https://github.com/nullhtp/feelu
-   cd feelu
-   code .
-   ```
+| Character | Dots | Binary | Vibration Pattern |
+|-----------|------|--------|-------------------|
+| A         | 1    | 100000 | Weak pulse, pause |
+| B         | 1–2  | 110000 | Medium pulse, pause |
+| C         | 1–4  | 100100 | Weak pulse, Weak pulse |
 
-2. **Install dependencies:**
-   ```bash
-   flutter pub get
-   ```
+### 🌀 Two-Phase Output
 
-3. **Configure Hugging Face Access Token (Required):**
-   
-   This app requires a Hugging Face access token to download AI models.
+1. **Phase 1**: Dots 1–2–3 → Pattern A  
+2. **Pause**: 200ms  
+3. **Phase 2**: Dots 4–5–6 → Pattern B
 
-   **Manual Setup Options:**
+📘 [View Full Vibration Encoding Spec](./VIBRO_BRAILLE_GUIDE.md)
 
-   ```bash
-   # Copy the example config and edit it
-   cp assets/config.example.json assets/config.json
-   # Edit config.json with your actual token
-   ```
+## 🤖 AI Capabilities
 
-   **Get your token from:** https://huggingface.co/settings/tokens
+| Function | Description |
+|----------|-------------|
+| **Camera Recognition** | Describes all visible objects via Braille |
+| **Speech Recognition** | Condenses speech into key ideas |
+| **Q&A Mode** | Answers natural language queries from Braille input |
+| **Text Expansion** | Converts keywords into full, coherent responses |
+| **100% Offline** | No internet or server dependencies after setup |
 
-4. **Verify Flutter setup:**
-   ```bash
-   flutter doctor
-   ```
-   Fix any issues reported by `flutter doctor`.
+## 🛠️ Requirements
 
-5. **Configure env variables:**
-   ```bash
-   # Copy the example .env and edit it
-   cp .env.example .env
-   ```
+| Category | Detail |
+|----------|--------|
+| Device | Android with vibration motor, microphone, and camera |
+| Storage | 2–4 GB free for local models |
+| Permissions | Camera, mic, vibration, storage, TTS, STT, screen lock |
+| Setup | One-time internet required for model download |
 
+✅ Fully tested on Pixel 7
 
-### Running the Project
+## 🧪 Troubleshooting
 
-#### Using VS Code Interface
+| Problem | Solution |
+|---------|----------|
+| App won’t start | Verify permissions and model initialization |
+| No vibration | Check system vibration settings |
+| Braille input issues | Ensure correct 1st/2nd half tap sequence |
+| Poor speech recognition | Reduce noise, speak clearly |
+| Camera not working | Ensure permissions and lighting are OK |
 
-1. **Open Command Palette** (`Cmd+Shift+P` / `Ctrl+Shift+P`)
-2. Type "Flutter: Select Device" and choose your target device
-3. Press `F5` or click "Run and Debug" to start the app
+📖 [More Help in User Guide →](./USER_GUIDE.md#troubleshooting)
 
-#### Using Terminal
+## 🔮 Future Features
 
-```bash
-# List available devices
-flutter devices
+- 🔤 Multilingual Braille support
+- ⏱ Rhythmic punctuation patterns
+- 😃 Emoji-to-vibration encoding
+- 💍 Wearables: Ring or band-style haptic devices
+- 🌐 Pattern sharing between users
+- 🤖 AI assistant with Android device control
+- 📸 Live camera chat interface
+- 🕓 Conversation history
+- 🎛 Swipe-based virtual input screen
 
-# Run on specific device
-flutter run -d <device-id>
+## 📚 Documentation
 
-# Run on all connected devices
-flutter run -d all
+- [User Guide](./USER_GUIDE.md)  
+- [Vibro-Braille System](./VIBRO_BRAILLE_GUIDE.md)
 
-# Run with hot reload (default)
-flutter run
+## 🤝 Contribute
 
-# Run in release mode
-flutter run --release
-```
+We welcome contributors passionate about accessibility:
 
-### Development Workflow
+1. Fork the repository
+2. Read [Development guide](./DEVELOPMENT.md)
+2. Open issues or feature requests
+3. Submit pull requests for review
 
-#### Hot Reload & Hot Restart
-
-- **Hot Reload**: `r` in terminal or `Cmd+S` / `Ctrl+S` (save file)
-- **Hot Restart**: `R` in terminal or `Cmd+Shift+F5` / `Ctrl+Shift+F5`
-
-#### Debugging
-
-1. Set breakpoints by clicking in the gutter next to line numbers
-2. Use Debug Console to inspect variables
-3. Use Debug Sidebar to view call stack and variables
-
-### Testing
-
-#### Running Tests
-
-```bash
-# Run all tests
-flutter test
-
-# Run specific test file
-flutter test test/widget_test.dart
-
-# Run tests with coverage
-flutter test --coverage
-```
-
-#### Using VS Code Test Explorer
-
-1. Install "Flutter Test Explorer" extension
-2. Use Test Explorer panel to run individual tests
-3. View test results inline with code
-
-### Building the App
-
-#### Debug Builds
-
-```bash
-# Android APK
-flutter build apk --debug
-
-# iOS (macOS only)
-flutter build ios --debug
-```
-
-#### Release Builds
-
-```bash
-# Android APK
-flutter build apk --release
-
-# Android App Bundle (for Play Store)
-flutter build appbundle
-
-# iOS (macOS only)
-flutter build ios --release
-
-# Web
-flutter build web
-
-# macOS (macOS only)
-flutter build macos
-
-# Windows (Windows only)
-flutter build windows
-
-# Linux (Linux only)
-flutter build linux
-```
-
-### Common Commands
-
-```bash
-# Get dependencies
-flutter pub get
-
-# Upgrade dependencies
-flutter pub upgrade
-
-# Clean build cache
-flutter clean
-
-# Analyze code
-flutter analyze
-
-# Format code
-dart format lib/
-
-# Generate code (if using code generation)
-flutter packages pub run build_runner build
-
-# Update Flutter
-flutter upgrade
-```
-
-### Troubleshooting
-
-#### Common Issues
-
-1. **"Flutter SDK not found"**
-   - Ensure Flutter is in your PATH
-   - Restart VS Code after installing Flutter
-
-2. **"No devices found"**
-   - For Android: Enable Developer Options and USB Debugging
-   - For iOS: Trust your computer on the device
-   - Check `flutter devices`
-
-3. **Pub get fails**
-   - Check internet connection
-   - Try `flutter clean` then `flutter pub get`
-
-4. **Hot reload not working**
-   - Check for syntax errors
-   - Try hot restart instead
-   - Restart the app completely
-
-5. **Model download fails with authentication error**
-   - Verify your Hugging Face access token is correct
-   - Check token has appropriate permissions
-   - Ensure environment variable or config.json is properly set
-
-#### Helpful Commands
-
-```bash
-# Check for issues
-flutter doctor -v
-
-# Clear all caches
-flutter clean && flutter pub get
-
-# Reset to stable channel
-flutter channel stable && flutter upgrade
-```
-
-### Security Notes
-
-- **Never commit sensitive tokens to git**: The `config.json` file is gitignored to prevent accidental commits
-- **Use environment variables in production**: Environment variables are more secure than config files
-- **Rotate tokens regularly**: Update your Hugging Face access token periodically
-- **Minimum permissions**: Use tokens with only the necessary permissions for model downloads
-
-### Additional Resources
-
-- [Flutter Documentation](https://docs.flutter.dev/)
-- [Dart Language Tour](https://dart.dev/guides/language/language-tour)
-- [Flutter Widget Catalog](https://docs.flutter.dev/development/ui/widgets)
-- [VS Code Flutter Extension Guide](https://docs.flutter.dev/development/tools/vs-code)
-- [Android Accessibility](https://developer.android.com/guide/topics/ui/accessibility)
-- [iOS Accessibility](https://developer.apple.com/accessibility/)
+Together, let’s make communication universal.

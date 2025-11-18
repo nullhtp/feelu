@@ -53,6 +53,10 @@ class InitializationService implements IInitializationService {
   }
 
   void _initializeServices() {
+    _services = [];
+    _currentIndex = 0;
+    _isInitializing = false;
+
     _services.add(
       ServiceInitializationState(
         name: 'Vibration Service',

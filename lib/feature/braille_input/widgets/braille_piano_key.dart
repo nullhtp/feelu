@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 class BraillePianoKey extends StatefulWidget {
   final String label;
+  final String? semanticLabel;
+  final String? semanticHint;
   final VoidCallback onPressed;
   final bool isPressed;
   final Color keyColor;
@@ -12,6 +14,8 @@ class BraillePianoKey extends StatefulWidget {
     super.key,
     required this.label,
     required this.onPressed,
+    this.semanticLabel,
+    this.semanticHint,
     this.isPressed = false,
     this.keyColor = Colors.transparent,
     this.pressedColor = Colors.blue,
@@ -76,8 +80,8 @@ class _BraillePianoKeyState extends State<BraillePianoKey>
         return Transform.scale(
           scale: _scaleAnimation.value,
           child: Semantics(
-            label: '${widget.label} key',
-            hint: 'Tap to input braille dot',
+            label: widget.semanticLabel ?? '${widget.label} key',
+            hint: widget.semanticHint ?? 'Tap to input braille dot',
             child: GestureDetector(
               onTapDown: _handleTapDown,
               onTapUp: _handleTapUp,

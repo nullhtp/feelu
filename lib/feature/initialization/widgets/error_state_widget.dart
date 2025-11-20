@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/extensions/context_extensions.dart';
 import '../models/service_initialization_state.dart';
 
 class ErrorStateWidget extends StatelessWidget {
@@ -14,13 +15,15 @@ class ErrorStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final errorMessage = service.errorMessage ?? l10n.gemmaUnknownError;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Icon(Icons.error, color: Colors.red, size: 64),
         const SizedBox(height: 15),
         Text(
-          'Initialization Failed: ${service.name}',
+          l10n.initializationErrorTitle(service.name),
           style: const TextStyle(
             color: Colors.red,
             fontSize: 18,
@@ -42,7 +45,7 @@ class ErrorStateWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Error: ${service.errorMessage}',
+                l10n.initializationErrorLabel(errorMessage),
                 style: const TextStyle(
                   color: Colors.red,
                   fontSize: 16,
@@ -71,9 +74,9 @@ class ErrorStateWidget extends StatelessWidget {
                   backgroundColor: Colors.blue,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-                child: const Text(
-                  'Retry',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+                child: Text(
+                  l10n.retryButtonLabel,
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/di/service_locator.dart';
+import '../../core/extensions/context_extensions.dart';
 import '../braille_input/braille_input_screen.dart';
 import 'initialization_service.dart';
 import 'models/service_initialization_state.dart';
@@ -21,13 +22,22 @@ class _InitializationScreenState extends State<InitializationScreen> {
   int _currentIndex = 0;
   bool _isComplete = false;
   bool _hasErrors = false;
+  bool _hasInitializedLocale = false;
 
   @override
   void initState() {
     super.initState();
     _setupListeners();
-    _initializationService.initialize();
-    _startInitialization();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_hasInitializedLocale) {
+      _initializationService.initialize(context.l10n);
+      _startInitialization();
+      _hasInitializedLocale = true;
+    }
   }
 
   void _setupListeners() {
@@ -116,9 +126,9 @@ class _InitializationScreenState extends State<InitializationScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'FeelU',
-          style: TextStyle(
+        Text(
+          context.l10n.appTitle,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 32,
             fontWeight: FontWeight.bold,
@@ -126,7 +136,7 @@ class _InitializationScreenState extends State<InitializationScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Initializing Services...',
+          context.l10n.initializingServices,
           style: TextStyle(color: Colors.grey[400], fontSize: 18),
         ),
       ],

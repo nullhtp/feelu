@@ -55,7 +55,7 @@ class BrailleService implements IBrailleService {
   /// Combine two halves and convert to character
   void _processCompleteBraille() {
     String fullPattern = firstHalf + secondHalf;
-    String? character = brailleMap[fullPattern];
+    final character = BrailleAlphabet.characterForPattern(fullPattern);
 
     if (character != null) {
       outputText.add(character);

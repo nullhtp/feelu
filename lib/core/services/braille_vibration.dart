@@ -15,7 +15,7 @@ class BrailleVibrationService implements IBrailleVibrationService {
   @override
   Future<void> vibrateBraille(String data) async {
     for (final char in data.toLowerCase().split('')) {
-      final braille = charToBraille[char] ?? '000000';
+      final braille = BrailleAlphabet.patternForCharacter(char) ?? '000000';
       await _vibrateBrailleSymbol(braille);
     }
   }
@@ -80,7 +80,7 @@ class BrailleAudioService implements IBrailleVibrationService {
   @override
   Future<void> vibrateBraille(String data) async {
     for (final char in data.toLowerCase().split('')) {
-      final braille = charToBraille[char] ?? '000000';
+      final braille = BrailleAlphabet.patternForCharacter(char) ?? '000000';
       await _playBrailleSymbol(braille);
       await Future.delayed(const Duration(milliseconds: 100));
     }

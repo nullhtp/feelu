@@ -2,20 +2,21 @@ import 'package:flutter/material.dart';
 
 import '../../core/domain/braille_code_map.dart';
 import '../../core/domain/braille_symbol.dart';
+import '../../core/extensions/context_extensions.dart';
 import '../../core/services/services.dart';
 import '../../core/widgets/swipe_gesture_detector.dart';
 import 'widgets/braille_text_widget.dart';
 
 class BrailleFullscreenScreen extends StatefulWidget {
   final String sourceText;
-  final String sourceTitle;
+  final String? sourceTitle;
   final Color themeColor;
   final IBrailleVibrationService brailleVibrationService;
 
   const BrailleFullscreenScreen({
     super.key,
     required this.sourceText,
-    this.sourceTitle = 'BRAILLE OUTPUT',
+    this.sourceTitle,
     this.themeColor = Colors.white30,
     required this.brailleVibrationService,
   });
@@ -44,7 +45,8 @@ class _BrailleFullscreenScreenState extends State<BrailleFullscreenScreen> {
 
     for (int i = 0; i < text.length; i++) {
       final char = text[i].toLowerCase();
-      final brailleCode = charToBraille[char] ?? '000000';
+      final brailleCode =
+          BrailleAlphabet.patternForCharacter(char) ?? '000000';
       symbols.add(
         BrailleSymbol(character: char, brailleCode: brailleCode, index: i),
       );
@@ -72,6 +74,8 @@ class _BrailleFullscreenScreenState extends State<BrailleFullscreenScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final title =
+        widget.sourceTitle ?? context.l10n.defaultBrailleOutputTitle;
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -80,7 +84,21 @@ class _BrailleFullscreenScreenState extends State<BrailleFullscreenScreen> {
           onSwipeDownThreeFingers: _navigateBack,
           child: Column(
             children: [
-              // Minimal status bar for screen readers
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      color: widget.themeColor,
+                      fontSize: 18,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
 
               // Main braille display area (maximized for touch)
               Expanded(child: _buildBrailleDisplayArea()),

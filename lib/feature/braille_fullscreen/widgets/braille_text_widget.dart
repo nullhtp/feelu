@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../core/domain/braille_symbol.dart';
+import '../../../core/extensions/context_extensions.dart';
 import '../../../core/services/services.dart';
 
 class BrailleTextWidget extends StatefulWidget {
@@ -57,10 +58,7 @@ class _BrailleTextWidgetState extends State<BrailleTextWidget> {
       return Container(
         padding: const EdgeInsets.all(16.0),
         child: const Center(
-          child: Text(
-            'No braille text to display',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
+          child: _EmptyBrailleMessage(),
         ),
       );
     }
@@ -94,6 +92,19 @@ class _BrailleTextWidgetState extends State<BrailleTextWidget> {
       ),
     );
   }
+
+class _EmptyBrailleMessage extends StatelessWidget {
+  const _EmptyBrailleMessage();
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      context.l10n.brailleNoText,
+      style: const TextStyle(fontSize: 16, color: Colors.grey),
+      textAlign: TextAlign.center,
+    );
+  }
+}
 
   void _handlePanUpdate(DragUpdateDetails details) {
     final RenderBox renderBox = context.findRenderObject() as RenderBox;

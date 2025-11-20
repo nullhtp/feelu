@@ -1,0 +1,154 @@
+{
+  "@@locale": "es",
+  "appTitle": "FeelU",
+  "initializingServices": "Inicializando servicios...",
+  "initializationSuccessTitle": "¡Todos los servicios están listos!",
+  "initializationSuccessSubtitle": "Abriendo la interfaz braille...",
+  "initializationErrorTitle": "Error al iniciar: {serviceName}",
+  "@initializationErrorTitle": {
+    "description": "Título cuando falla la inicialización de un servicio",
+    "placeholders": {
+      "serviceName": {
+        "example": "Servicio de cámara"
+      }
+    }
+  },
+  "initializationErrorLabel": "Error: {errorMessage}",
+  "@initializationErrorLabel": {
+    "description": "Etiqueta previa al mensaje de error",
+    "placeholders": {
+      "errorMessage": {
+        "example": "Permiso denegado"
+      }
+    }
+  },
+  "retryButtonLabel": "Reintentar",
+  "brailleAssistantOutputTitle": "RESPUESTA DEL ASISTENTE",
+  "brailleDecoding": "Descodificando",
+  "brailleSpeaking": "Hablando...",
+  "braillePreparingAnswer": "Preparando respuesta",
+  "brailleNoText": "No hay texto braille para mostrar",
+  "brailleDot1Label": "PUNTO 1",
+  "brailleDot2Label": "PUNTO 2",
+  "brailleDot3Label": "PUNTO 3",
+  "brailleSpaceLabel": "ESPACIO",
+  "brailleKeySemanticLabel": "Tecla {keyName}",
+  "@brailleKeySemanticLabel": {
+    "description": "Etiqueta para lectores de pantalla en una tecla braille",
+    "placeholders": {
+      "keyName": {
+        "example": "PUNTO 1"
+      }
+    }
+  },
+  "brailleKeySemanticHint": "Toca para introducir puntos braille",
+  "photoTapToSee": "Toca para ver",
+  "photoCapturing": "Capturando...",
+  "photoDescribing": "Describiendo...",
+  "photoInitializationError": "No se pudo iniciar foto-vibro: {error}",
+  "@photoInitializationError": {
+    "description": "Snackbar cuando falla la inicialización de foto-vibro",
+    "placeholders": {
+      "error": {
+        "example": "La cámara está ocupada"
+      }
+    }
+  },
+  "photoCaptureError": "Error al capturar o procesar la imagen: {error}",
+  "@photoCaptureError": {
+    "description": "Snackbar cuando falla la captura o el procesamiento",
+    "placeholders": {
+      "error": {
+        "example": "Tiempo de espera agotado"
+      }
+    }
+  },
+  "speechTapToListen": "Toca para escuchar",
+  "speechListening": "Escuchando...",
+  "speechSummarizing": "Resumiendo...",
+  "serviceVibrationName": "Servicio de vibración",
+  "serviceVibrationDescription": "Comprobando las capacidades de vibración del dispositivo",
+  "serviceCameraName": "Servicio de cámara",
+  "serviceCameraDescription": "Inicializando la cámara para el reconocimiento de fotos",
+  "serviceTtsName": "Texto a voz",
+  "serviceTtsDescription": "Inicializando el motor de síntesis de voz",
+  "serviceSpeechRecognitionName": "Reconocimiento de voz",
+  "serviceSpeechRecognitionDescription": "Inicializando el motor de reconocimiento de voz",
+  "serviceGemmaName": "Modelo Gemma AI",
+  "serviceGemmaDescription": "Cargando el modelo de IA para la traducción braille",
+  "speechRecognitionReady": "El reconocimiento de voz está listo",
+  "gemmaDownloading": "Descargando modelo... {progress}",
+  "@gemmaDownloading": {
+    "description": "Estado mientras se descarga el modelo de IA",
+    "placeholders": {
+      "progress": {
+        "example": "42%"
+      }
+    }
+  },
+  "gemmaInitializing": "Inicializando el modelo de IA...",
+  "gemmaReady": "El modelo de IA está listo",
+  "vibrationUnavailableError": "La vibración no está disponible en este dispositivo",
+  "vibrationUnavailableFix": "Este dispositivo no admite vibración. La app funcionará sin respuesta háptica.",
+  "vibrationCheckFailedError": "No se pudo comprobar la vibración: {error}",
+  "@vibrationCheckFailedError": {
+    "description": "Error al comprobar la disponibilidad de vibración",
+    "placeholders": {
+      "error": {
+        "example": "Permiso denegado"
+      }
+    }
+  },
+  "vibrationCheckFailedFix": "Asegúrate de que tu dispositivo admite vibración e intenta reiniciar la app.",
+  "cameraInitFailedError": "No se pudo iniciar el servicio de cámara",
+  "cameraInitFailedFix": "Asegúrate de que la cámara esté habilitada en los ajustes del sistema.",
+  "cameraInitError": "Error al iniciar la cámara: {error}",
+  "@cameraInitError": {
+    "description": "Error cuando la cámara lanza una excepción",
+    "placeholders": {
+      "error": {
+        "example": "No hay cámara disponible"
+      }
+    }
+  },
+  "cameraInitErrorFix": "Ve a Ajustes > Privacidad y seguridad > Cámara y comprueba que esté activada.",
+  "ttsInitFailedError": "No se pudo iniciar texto a voz",
+  "ttsInitFailedFix": "Asegúrate de que el dispositivo tenga texto a voz habilitado en los ajustes.",
+  "ttsInitError": "Error al iniciar texto a voz: {error}",
+  "@ttsInitError": {
+    "description": "Error cuando texto a voz lanza una excepción",
+    "placeholders": {
+      "error": {
+        "example": "Motor no instalado"
+      }
+    }
+  },
+  "ttsInitErrorFix": "Ve a Ajustes > Accesibilidad > Texto a voz y comprueba que esté activado.",
+  "speechInitFailedError": "No se pudo iniciar el reconocimiento de voz",
+  "speechInitFailedFix": "Asegúrate de que el reconocimiento de voz esté habilitado en los ajustes del sistema.",
+  "speechInitError": "Error al iniciar el reconocimiento de voz: {error}",
+  "@speechInitError": {
+    "description": "Error cuando reconocimiento de voz lanza una excepción",
+    "placeholders": {
+      "error": {
+        "example": "Falta permiso de micrófono"
+      }
+    }
+  },
+  "speechInitErrorFix": "Ve a Ajustes > Privacidad y seguridad > Reconocimiento de voz y comprueba que esté activado.",
+  "gemmaInitError": "Error al iniciar Gemma: {error}",
+  "@gemmaInitError": {
+    "description": "Error cuando el modelo Gemma lanza una excepción",
+    "placeholders": {
+      "error": {
+        "example": "Tiempo de espera de red"
+      }
+    }
+  },
+  "gemmaUnknownError": "Error desconocido",
+  "gemmaFixNetwork": "Comprueba tu conexión a internet e inténtalo de nuevo. El modelo debe descargarse la primera vez.",
+  "gemmaFixCorrupted": "El archivo del modelo está dañado. Pulsa «Reintentar» para borrarlo y descargarlo otra vez.",
+  "gemmaFixStorage": "Libera espacio de almacenamiento en el dispositivo. El modelo necesita unas 2 GB.",
+  "gemmaFixRestart": "Intenta reiniciar la app. Si continúa el problema, borra los datos de la app e inténtalo otra vez.",
+  "defaultBrailleOutputTitle": "SALIDA BRAILLE"
+}

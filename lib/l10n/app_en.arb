@@ -1,0 +1,154 @@
+{
+  "@@locale": "en",
+  "appTitle": "FeelU",
+  "initializingServices": "Initializing services...",
+  "initializationSuccessTitle": "All services ready!",
+  "initializationSuccessSubtitle": "Launching braille interface...",
+  "initializationErrorTitle": "Initialization failed: {serviceName}",
+  "@initializationErrorTitle": {
+    "description": "Title shown when a service fails to initialize",
+    "placeholders": {
+      "serviceName": {
+        "example": "Camera service"
+      }
+    }
+  },
+  "initializationErrorLabel": "Error: {errorMessage}",
+  "@initializationErrorLabel": {
+    "description": "Label shown before the error message text",
+    "placeholders": {
+      "errorMessage": {
+        "example": "Permission denied"
+      }
+    }
+  },
+  "retryButtonLabel": "Retry",
+  "brailleAssistantOutputTitle": "ASSISTANT OUTPUT",
+  "brailleDecoding": "Decoding",
+  "brailleSpeaking": "Speaking...",
+  "braillePreparingAnswer": "Preparing answer",
+  "brailleNoText": "No braille text to display",
+  "brailleDot1Label": "DOT 1",
+  "brailleDot2Label": "DOT 2",
+  "brailleDot3Label": "DOT 3",
+  "brailleSpaceLabel": "SPACE",
+  "brailleKeySemanticLabel": "{keyName} key",
+  "@brailleKeySemanticLabel": {
+    "description": "Screen reader label for a braille piano key",
+    "placeholders": {
+      "keyName": {
+        "example": "DOT 1"
+      }
+    }
+  },
+  "brailleKeySemanticHint": "Tap to input braille dots",
+  "photoTapToSee": "Tap to see",
+  "photoCapturing": "Capturing...",
+  "photoDescribing": "Describing...",
+  "photoInitializationError": "Failed to initialize photo vibro: {error}",
+  "@photoInitializationError": {
+    "description": "Snackbar text when photo vibro fails to initialize",
+    "placeholders": {
+      "error": {
+        "example": "Camera is busy"
+      }
+    }
+  },
+  "photoCaptureError": "Error capturing or processing the image: {error}",
+  "@photoCaptureError": {
+    "description": "Snackbar text when photo capture or processing fails",
+    "placeholders": {
+      "error": {
+        "example": "Timeout"
+      }
+    }
+  },
+  "speechTapToListen": "Tap to listen",
+  "speechListening": "Listening...",
+  "speechSummarizing": "Summarizing...",
+  "serviceVibrationName": "Vibration service",
+  "serviceVibrationDescription": "Checking device vibration capabilities",
+  "serviceCameraName": "Camera service",
+  "serviceCameraDescription": "Initializing camera for photo recognition",
+  "serviceTtsName": "Text-to-speech",
+  "serviceTtsDescription": "Initializing speech synthesis engine",
+  "serviceSpeechRecognitionName": "Speech recognition",
+  "serviceSpeechRecognitionDescription": "Initializing speech recognition engine",
+  "serviceGemmaName": "Gemma AI model",
+  "serviceGemmaDescription": "Loading AI model for braille translation",
+  "speechRecognitionReady": "Speech recognition ready",
+  "gemmaDownloading": "Downloading model... {progress}",
+  "@gemmaDownloading": {
+    "description": "Status shown while the AI model downloads",
+    "placeholders": {
+      "progress": {
+        "example": "42%"
+      }
+    }
+  },
+  "gemmaInitializing": "Initializing AI model...",
+  "gemmaReady": "AI model ready",
+  "vibrationUnavailableError": "Vibration not available on this device",
+  "vibrationUnavailableFix": "This device does not support vibration. The app will work without haptic feedback.",
+  "vibrationCheckFailedError": "Failed to check vibration capabilities: {error}",
+  "@vibrationCheckFailedError": {
+    "description": "Error shown when vibration availability check fails",
+    "placeholders": {
+      "error": {
+        "example": "Permission denied"
+      }
+    }
+  },
+  "vibrationCheckFailedFix": "Please ensure your device supports vibration and try restarting the app.",
+  "cameraInitFailedError": "Failed to initialize camera service",
+  "cameraInitFailedFix": "Please ensure your device has camera capabilities enabled in system settings.",
+  "cameraInitError": "Camera service initialization error: {error}",
+  "@cameraInitError": {
+    "description": "Error when camera service initialization throws",
+    "placeholders": {
+      "error": {
+        "example": "No camera available"
+      }
+    }
+  },
+  "cameraInitErrorFix": "Go to Settings > Privacy & Security > Camera and ensure it's enabled.",
+  "ttsInitFailedError": "Failed to initialize text-to-speech",
+  "ttsInitFailedFix": "Please ensure your device has TTS capabilities enabled in system settings.",
+  "ttsInitError": "TTS initialization error: {error}",
+  "@ttsInitError": {
+    "description": "Error when text-to-speech initialization throws",
+    "placeholders": {
+      "error": {
+        "example": "Engine not installed"
+      }
+    }
+  },
+  "ttsInitErrorFix": "Go to Settings > Accessibility > Text-to-Speech and ensure it's enabled.",
+  "speechInitFailedError": "Failed to initialize speech recognition",
+  "speechInitFailedFix": "Please ensure your device has speech recognition capabilities enabled in system settings.",
+  "speechInitError": "Speech recognition initialization error: {error}",
+  "@speechInitError": {
+    "description": "Error when speech recognition initialization throws",
+    "placeholders": {
+      "error": {
+        "example": "Microphone permission missing"
+      }
+    }
+  },
+  "speechInitErrorFix": "Go to Settings > Privacy & Security > Speech Recognition and ensure it's enabled.",
+  "gemmaInitError": "Gemma initialization error: {error}",
+  "@gemmaInitError": {
+    "description": "Error when Gemma model initialization throws",
+    "placeholders": {
+      "error": {
+        "example": "Network timeout"
+      }
+    }
+  },
+  "gemmaUnknownError": "Unknown error",
+  "gemmaFixNetwork": "Check your internet connection and try again. The AI model needs to be downloaded on first use.",
+  "gemmaFixCorrupted": "The model file is corrupted. Tap \"Retry\" to clear and re-download the model.",
+  "gemmaFixStorage": "Free up storage space on your device. The AI model requires about 2GB of space.",
+  "gemmaFixRestart": "Try restarting the app. If the problem persists, clear app data and try again.",
+  "defaultBrailleOutputTitle": "BRAILLE OUTPUT"
+}

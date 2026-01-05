@@ -1,222 +1,159 @@
-# User Guide
+# FeelU User Guide
 
-## Overview
+## 1. What is FeelU?
 
-FeelU is an Android application specifically designed to help deaf-blind individuals communicate with the outside world through innovative Braille-vibration feedback, AI-powered image recognition, speech processing, and Braille input systems.
+FeelU is an Android app for **deaf-blind individuals**. It helps you communicate with the world. It uses vibrations, a camera, and voice tools to help you read and write using Braille.
 
-## Key Features
+**Main Features:**
 
-- **Braille Input System**: Interactive piano-style keyboard for Braille character input
-- **Haptic Feedback**: Vibration patterns for different types of feedback and Braille character output
-- **AI-Powered Image Recognition**: Camera-based object identification with voice descriptions
-- **Speech Recognition & Synthesis**: Voice input/output capabilities
-- **AI Assistant**: Personal assistant for questions and help
-- **Multi-finger Gesture Navigation**: Accessible navigation between app features
-- **Braille Text System**: Interface for reading text in Braille format through touch and vibration
+- **Braille Keyboard:** A piano-style keyboard to type Braille.
+- **Vibration (Haptic) Feedback:** The phone vibrates to let you feel buttons and text.
+- **Smart Camera:** Takes photos and describes objects to you using voice and vibration.
+- **Voice Mode:** Listens to speech and turns it into text/vibration.
+- **AI Assistant:** A smart helper you can ask questions.
 
-## Getting Started
+---
 
-### First Launch
-1. When you first open FeelU, the app will automatically initialize all required services
-2. You'll see an initialization screen that sets up:
-   - Speech recognition and text-to-speech services
-   - AI models for image recognition and text processing
-   - Camera services
-   - Vibration feedback systems
-3. Wait for all services to initialize successfully (indicated by completion sounds and vibrations)
-4. The app will automatically navigate to the main Braille Input screen
+## 2. Main Features Guide
 
-### Device Orientation
-- FeelU is designed to work in landscape mode only
-- The device will automatically lock to landscape orientation when the app starts
-- The app keeps your screen awake to prevent interruptions during use
+### A. Braille Input Screen (Home Screen)
 
-## Main Features Guide
+![Main screen](_docs/input-screen.jpg)
+This is the main screen. You start here.
 
-### 1. Braille Input Screen (Main Hub)
+**Screen Layout:**
 
-![Braille Input Screen](_docs/input-screen.jpg)
+- **Top Part (2/3):** Shows the text you type.
+- **Bottom Part (1/3):** The Piano Keyboard for typing.
 
-This is the central screen where you can input text using Braille and navigate to other features.
+**How the Keyboard Works:**
 
-#### Layout:
-- **Top Area (2/3 of screen)**: Display area showing current text and status
-- **Bottom Area (1/3 of screen)**: Braille piano keyboard
+- **3 Main Keys:** These represent the left side of a Braille cell (Dots 1, 2, and 3).
+- **Space Key:** Use this for empty spots (no dots).
 
-#### Braille Piano Keyboard:
-- **3 Main Keys**: Represent the left column of a Braille cell (dots 1, 2, 3)
-- **Space Key**: Represents empty input (dots 4, 5, 6 set to zero)
+**How to Type a Braille Character:**
 
-#### How to Input Braille:
+![Braille input character](_docs/braille-input.png)
 
-![Braille Input Concept](_docs/braille-input.png)
+1. **Step 1 (First Half):** Press the keys for the _left_ side of the Braille character. The phone will vibrate heavily.
+2. **Step 2 (Second Half):** Press the keys for the _right_ side of the Braille character.
+3. **Result:** The app combines both steps to make one full Braille letter.
 
-1. **First Half**: Press combination of the 3 main keys or space for the first half of the Braille character
-2. **Second Half**: Press combination of the 3 main keys or space for the second half of the Braille character
-3. The app automatically combines both halves to form a complete Braille character
-4. Characters are converted to text and displayed on screen
-5. Use the gesture to process your complete text
+**Navigation Gestures (Use 3 Fingers):**
+Swipe on the **top part** of the screen.
 
-#### Haptic Feedback:
-- Heavy vibration when you press the first half of a character
-- Different vibration patterns indicate successful character recognition
-- Error patterns for invalid input
+| Action           | Result                                                       |
+| ---------------- | ------------------------------------------------------------ |
+| **Swipe Left**   | Go to **Camera** (Photo Vibro)                               |
+| **Swipe Right**  | Go to **Voice** (Speech Vibro)                               |
+| **Swipe Up**     | Ask the **AI Assistant** (write a question first)            |
+| **Swipe Down**   | **Read Text** (Turn your written text into speech/vibration) |
+| **1-Finger Tap** | Delete the last letter                                       |
 
-#### Navigation Gestures (3-finger swipes on top area):
-- **Swipe Left**: Go to Photo Vibro (Camera) screen
-- **Swipe Right**: Go to Speech Vibro (Voice) screen  
-- **Swipe Up**: Ask the AI Assistant a question
-- **Swipe Down**: Text to speak generation
+---
 
-### 2. Photo Vibro Screen (Camera Mode)
+### B. Photo Vibro Screen (Camera)
 
-![Photo Vibro Screen](_docs/camera-screen.jpg)
+![Camera screen](_docs/camera-screen.jpg)
+Take a picture to find out what is in front of you.
 
-This feature allows you to take photos and receive AI-generated descriptions of what's in the image.
+**How to use:**
 
-#### How to Use:
-1. Navigate here by **3-finger swipe left** from the main screen
-2. **Tap anywhere** on the screen to capture a photo
+1. **Swipe Left** from the Home Screen to get here.
+2. **Tap anywhere** on the screen to take a photo.
+3. **Wait.** The app needs time to think (about 15 seconds).
+4. The app will describe the objects in the photo using Braille vibration.
+
+**Screen Status:**
+
+- **"Tap to see"**: Ready to take a photo.
+- **"Capturing..."**: Taking the photo now.
+- **"Describing..."**: The AI is thinking.
+
+> **To go back:** Swipe **Right** with 3 fingers.
+
+---
+
+### C. Speech Vibro Screen (Voice Mode)
+
+![Listen screen](_docs/listen-screen.jpg)
+The app listens to people talking and turns it into text for you.
+
+**How to use:**
+
+1. **Swipe Right** from the Home Screen to get here.
+2. **Tap the screen** to start listening.
 3. The app will:
-   - Take a photo using the rear camera
-   - Process the image with AI recognition
-   - Provide a Braille-vibration output of objects in the image
 
-#### Screen States:
-- **Ready**: "Tap to see" - ready to take a photo
-- **Capturing**: "Capturing..." - taking the photo
-- **Processing**: "Describing..." - AI is analyzing the image
+- Listen to speech.
+- Summarize it (make the text shorter).
+- Turn the text into Braille vibration.
 
-#### Navigation:
-- **3-finger swipe right**: Return to Braille Input screen
+**Note:** The app stops listening if there is silence for 3 seconds.
 
-### 3. Speech Vibro Screen (Voice Mode)
+> **To go back:** Swipe **Left** with 3 fingers.
 
-![Speech Vibro Screen](_docs/listen-screen.jpg)
+---
 
-This feature enables speech recognition and converts spoken words into text with haptic feedback.
+### D. AI Assistant
 
-#### How to Use:
-1. Navigate here by **3-finger swipe right** from the main screen
-2. Tap to starts listening for speech
-3. The app will:
-   - Recognize speech around you and convert it to text
-   - Summarized version of what it heard
-   - Convert summarized text to Braille vibration
+![AI Assistant](_docs/input-screen-preparing-answer.jpeg)
+You can ask the app for help or general questions.
 
-#### Speech Processing:
-- Continuous listening with 3-second silence detection
-- Automatic text summarization for long speech
-- Braille vibration feedback of recognized and processed text
+1. Type your question on the main screen.
+2. **Swipe Up** with 3 fingers.
+3. The Assistant will answer you using vibration.
 
-#### Navigation:
-- **3-finger swipe left**: Return to Braille Input screen
+---
 
-### 4. AI Assistant
+### E. Braille Fullscreen Mode (Reading Mode)
 
-Access the AI assistant for questions and help.
+![Braille Fullscreen Mode](_docs/read-sceen-2.jpeg)
+This screen appears when the app wants you to "read" text with your fingers. You can learn more about how this works [here](https://www.google.com/search?q=VIBRO_BRAILLE_GUIDE.md).
 
-#### How to Use:
-1. Ask questions using Braille input
-2. **3-finger swipe up** from the main Braille screen
-3. The assistant provides concise, helpful responses
-4. Responses are delivered through Braille-vibration output
+**How to read:**
 
-### 5. Braille Fullscreen Mode
+- **Touch:** Tap a dot to feel its vibration pattern.
+- **Slide:** Drag your finger across the dots to read continuously.
+- **Wait Time:** There is a short delay (0.15 seconds) between vibrations so the letters do not mix together.
 
-![Braille Fullscreen Mode](_docs/read-screen.jpg)
+> **To go back:** Swipe **Down** with 3 fingers.
 
-This feature provides a dedicated fullscreen interface for reading text in Braille format through touch and vibration.
+---
 
-#### How to Access:
-- Automatically opens when the AI Assistant provides responses
-- Displays AI-generated text in visual Braille format with tactile feedback
-- Optimized for touch-based Braille reading
+## 3. Privacy and AI
 
-#### How to Use:
-1. **Touch Reading**: Tap on individual Braille characters to feel their vibration pattern
-2. **Slide Reading**: Drag your finger across characters to read continuously
-3. **Character Recognition**: Each character vibrates its unique Braille pattern when touched
-4. **Cooldown System**: 150ms delay between character vibrations to prevent overlap
+- **Offline:** The AI works on your phone. It does **not** need the internet after you set it up.
+- **Private:** Your photos and voice data stay on your phone. They are not sent to any servers.
+- **Summarization:** If a text is very long, the AI will make it shorter so it is faster to read.
 
-#### Navigation:
-- **3-finger swipe down**: Return to previous screen
+---
 
-#### Touch Interface:
-- **Pan Gesture**: Slide finger to read multiple characters in sequence
-- **Tap Gesture**: Touch individual characters for precise reading
-- **Vibration Feedback**: Each character produces its unique Braille vibration pattern
-- **Position Detection**: Automatically detects which character you're touching
+## 4. Troubleshooting (Fixing Problems)
 
-## AI Features
+### App Won't Start
 
-### Image Recognition:
-- Identifies objects in photos
-- Provides concise descriptions (10 words or less)
-- Returns "Empty" if no clear objects are detected
-- Processes images locally using Gemma AI model
+- Did you download the AI models? (You might need a Hugging Face token).
+- Did you give permission for the Camera, Microphone, and Vibration?
+- Try closing the app and opening it again.
 
-### Text Processing:
-- **Summarization**: Condenses long text into brief summaries
-- **Decoding**: Interprets and clarifies unclear text
-- **Assistant**: Answers questions and provides help
+### Braille Typing Is Not Working
 
-### Privacy:
-- All AI processing happens locally on your device
-- No data is sent to external servers
-- Requires one-time download of AI models
+- Press the keys harder.
+- Wait for the vibration after the "First Half" before pressing the "Second Half."
+- Delete the text and try again.
 
-## Troubleshooting
+### Voice/Speech Is Not Working
 
-### Common Issues:
+- Speak clearly.
+- Make sure the room is not too noisy.
+- Wait for 3 seconds of silence so the app knows you are finished speaking.
 
-#### App Won't Start:
-- Ensure AI models are downloaded (requires Hugging Face token)
-- Check that all permissions are granted (camera, microphone, vibration)
-- Restart the app and wait for complete initialization
+### No Vibration
 
-#### Braille Input Not Working:
-- Ensure you're pressing keys firmly
-- Wait for haptic feedback before pressing the second half
-- Try clearing current input and starting fresh
+- Check your Android settings. Is "Vibration" turned on?
+- Check Accessibility settings.
 
-#### Speech Recognition Issues:
-- Speak clearly and at moderate pace
-- Ensure microphone permissions are granted
-- Check for background noise interference
-- Wait 3 seconds of silence to complete recognition
+### Need Help?
 
-#### Camera Not Responding:
-- Grant camera permissions in device settings
-- Ensure rear camera is not blocked
-- Good lighting improves recognition accuracy
-
-#### No Vibration:
-- Check device vibration settings
-- Ensure vibration is enabled in accessibility settings
-- Some devices may have limited vibration capabilities
-
-### Getting Help:
-- Use the AI Assistant (3-finger swipe up) for quick help
-- Check that all device permissions are properly granted
-- Restart the app if services fail to initialize
-
-## Technical Requirements
-
-### Device Requirements:
-- Android device with camera
-- Microphone capabilities
-- Vibration motor with amplitude modulation
-- Sufficient storage for AI models (~2-4 GB)
-- Internet connection for initial model download
-
-### Permissions Required:
-- Camera access
-- Microphone access
-- Vibration control
-- Wake lock (keep screen on)
-- Storage access for AI models
-
-### Setup Requirements:
-- Initial internet connection for model download
-- Complete app initialization before use
+- Use the **AI Assistant** (Swipe Up with 3 fingers) to ask for help inside the app.

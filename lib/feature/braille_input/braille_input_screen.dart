@@ -8,6 +8,7 @@ import '../../core/services/services.dart';
 import '../../core/widgets/icon_paths.dart';
 import '../../core/widgets/icon_text_widget.dart';
 import '../../core/widgets/swipe_gesture_detector.dart';
+import '../../core/extensions/context_extensions.dart';
 import '../../feature/braille_fullscreen/braille_fullscreen_screen.dart';
 import '../../feature/photo_vibro/photo_vibro_screen.dart';
 import '../../feature/speech_vibro/speech_vibro_screen.dart';
@@ -81,7 +82,7 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
         MaterialPageRoute(
           builder: (context) => BrailleFullscreenScreen(
             sourceText: brailleText,
-            sourceTitle: 'ASSISTANT OUTPUT',
+              sourceTitle: context.l10n.brailleAssistantOutputTitle,
             themeColor: Colors.green.withValues(alpha: 0.3),
             brailleVibrationService: _brailleVibrationService,
           ),
@@ -263,6 +264,7 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
   }
 
   Widget _buildMainContent() {
+    final l10n = context.l10n;
     switch (_currentState) {
       case BrailleInputState.ready:
         return IconTextWidget(
@@ -274,20 +276,20 @@ class _BrailleInputScreenState extends State<BrailleInputScreen> {
       case BrailleInputState.processingTransform:
         return IconTextWidget(
           imageIcon: IconPaths.gemma3n,
-          text: 'Decoding',
+          text: l10n.brailleDecoding,
           textColor: Colors.white,
         );
       case BrailleInputState.processingOutput:
         return IconTextWidget(
           svgIcon: IconPaths.speak2,
-          text: 'Speaking...',
+          text: l10n.brailleSpeaking,
           iconColor: Colors.green,
           textColor: Colors.green,
         );
       case BrailleInputState.processingAssistant:
         return IconTextWidget(
           imageIcon: IconPaths.gemma3n,
-          text: 'Preparing answer',
+          text: l10n.braillePreparingAnswer,
           textColor: Colors.white,
         );
     }

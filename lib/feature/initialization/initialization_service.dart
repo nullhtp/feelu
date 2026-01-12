@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 import '../../core/di/service_locator.dart';
 import '../../core/services/services.dart';
 import 'models/service_initialization_state.dart';
@@ -8,7 +10,7 @@ abstract class IInitializationService {
   Stream<List<ServiceInitializationState>> get servicesStream;
   Stream<int> get currentIndexStream;
   Stream<bool> get completionStream;
-  void initialize();
+  void initialize(AppLocalizations localizations);
   Future<bool> startInitialization();
   Future<void> retryInitialization();
   void dispose();
@@ -29,6 +31,7 @@ class InitializationService implements IInitializationService {
   final ISpeechRecognitionService _speechRecognitionService =
       ServiceLocator.get<ISpeechRecognitionService>();
   final IAiModelService _aiModelService = ServiceLocator.get<IAiModelService>();
+  late AppLocalizations _localizations;
 
   @override
   Stream<List<ServiceInitializationState>> get servicesStream =>
@@ -47,7 +50,11 @@ class InitializationService implements IInitializationService {
   bool get isInitializing => _isInitializing;
 
   @override
-  void initialize() {
+  void initialize(AppLocalizations localizations) {
+    _localizations = localizations;
+    _services = [];
+    _currentIndex = 0;
+    _isInitializing = false;
     _initializeServices();
     _servicesController.add(_services);
   }
@@ -55,36 +62,36 @@ class InitializationService implements IInitializationService {
   void _initializeServices() {
     _services.add(
       ServiceInitializationState(
-        name: 'Vibration Service',
-        description: 'Checking device vibration capabilities',
+        name: _localizations.serviceVibrationName,
+        description: _localizations.serviceVibrationDescription,
         initiator: _initializeVibrationService,
       ),
     );
     _services.add(
       ServiceInitializationState(
-        name: 'Camera Service',
-        description: 'Initializing camera for photo recognition',
+        name: _localizations.serviceCameraName,
+        description: _localizations.serviceCameraDescription,
         initiator: _initializeCameraService,
       ),
     );
     _services.add(
       ServiceInitializationState(
-        name: 'Text-to-Speech',
-        description: 'Initializing speech synthesis engine',
+        name: _localizations.serviceTtsName,
+        description: _localizations.serviceTtsDescription,
         initiator: _initializeTtsService,
       ),
     );
     _services.add(
       ServiceInitializationState(
-        name: 'Speech Recognition',
-        description: 'Initializing speech recognition engine',
+        name: _localizations.serviceSpeechRecognitionName,
+        description: _localizations.serviceSpeechRecognitionDescription,
         initiator: _initializeSpeechRecognitionService,
       ),
     );
     _services.add(
       ServiceInitializationState(
-        name: 'Gemma AI Model',
-        description: 'Loading AI model for braille translation',
+        name: _localizations.serviceGemmaName,
+        description: _localizations.serviceGemmaDescription,
         initiator: _initializeGemmaService,
       ),
     );
@@ -145,16 +152,16 @@ class InitializationService implements IInitializationService {
       } else {
         _updateServiceError(
           index,
-          'Vibration not available on this device',
-          'This device does not support vibration. The app will work without haptic feedback.',
+          _localizations.vibrationUnavailableError,
+          _localizations.vibrationUnavailableFix,
         );
         return false;
       }
     } catch (e) {
       _updateServiceError(
         index,
-        'Failed to check vibration capabilities: $e',
-        'Please ensure your device supports vibration and try restarting the app.',
+        _localizations.vibrationCheckFailedError('$e'),
+        _localizations.vibrationCheckFailedFix,
       );
       return false;
     }
@@ -170,16 +177,16 @@ class InitializationService implements IInitializationService {
       } else {
         _updateServiceError(
           index,
-          'Failed to initialize Camera Service',
-          'Please ensure your device has camera capabilities enabled in system settings.',
+          _localizations.cameraInitFailedError,
+          _localizations.cameraInitFailedFix,
         );
         return false;
       }
     } catch (e) {
       _updateServiceError(
         index,
-        'Camera Service initialization error: $e',
-        'Go to Settings > Privacy & Security > Camera and ensure it\'s enabled.',
+        _localizations.cameraInitError('$e'),
+        _localizations.cameraInitErrorFix,
       );
       return false;
     }
@@ -195,16 +202,16 @@ class InitializationService implements IInitializationService {
       } else {
         _updateServiceError(
           index,
-          'Failed to initialize Text-to-Speech',
-          'Please ensure your device has TTS capabilities enabled in system settings.',
+          _localizations.ttsInitFailedError,
+          _localizations.ttsInitFailedFix,
         );
         return false;
       }
     } catch (e) {
       _updateServiceError(
         index,
-        'TTS initialization error: $e',
-        'Go to Settings > Accessibility > Text-to-Speech and ensure it\'s enabled.',
+        _localizations.ttsInitError('$e'),
+        _localizations.ttsInitErrorFix,
       );
       return false;
     }
@@ -215,22 +222,22 @@ class InitializationService implements IInitializationService {
       await _speechRecognitionService.initialize();
 
       if (_speechRecognitionService.isInitialized) {
-        _updateServiceDescription(index, 'Speech recognition ready');
+        _updateServiceDescription(index, _localizations.speechRecognitionReady);
         _updateServiceStatus(index, ServiceStatus.success);
         return true;
       } else {
         _updateServiceError(
           index,
-          'Failed to initialize Speech Recognition',
-          'Please ensure your device has speech recognition capabilities enabled in system settings.',
+          _localizations.speechInitFailedError,
+          _localizations.speechInitFailedFix,
         );
         return false;
       }
     } catch (e) {
       _updateServiceError(
         index,
-        'Speech recognition initialization error: $e',
-        'Go to Settings > Privacy & Security > Speech Recognition and ensure it\'s enabled.',
+        _localizations.speechInitError('$e'),
+        _localizations.speechInitErrorFix,
       );
       return false;
     }
@@ -238,59 +245,62 @@ class InitializationService implements IInitializationService {
 
   Future<bool> _initializeGemmaService(int index) async {
     try {
-      // Listen to progress and loading messages
-      final progressSubscription = _aiModelService.downloadProgressStream
-          .listen((progress) {
-            if (progress != null) {
-              _updateServiceProgress(index, progress);
-            }
-          });
-
-      final messageSubscription = _aiModelService.loadingMessageStream.listen((
-        message,
-      ) {
-        _updateServiceDescription(index, message);
+      final progressSubscription =
+          _aiModelService.downloadProgressStream.listen((progress) {
+        if (progress != null) {
+          _updateServiceProgress(index, progress);
+          final progressPercent = '${(progress * 100).toStringAsFixed(1)}%';
+          _updateServiceDescription(
+            index,
+            _localizations.gemmaDownloading(progressPercent),
+          );
+        }
       });
+
+      _updateServiceDescription(index, _localizations.gemmaInitializing);
 
       await _aiModelService.initialize();
 
-      // Cancel subscriptions
       await progressSubscription.cancel();
-      await messageSubscription.cancel();
 
       if (_aiModelService.isInitialized) {
-        _updateServiceDescription(index, 'AI model ready');
+        _updateServiceDescription(index, _localizations.gemmaReady);
         _updateServiceStatus(index, ServiceStatus.success);
         return true;
       } else {
+        final error =
+            _aiModelService.errorMessage ?? _localizations.gemmaUnknownError;
         _updateServiceError(
           index,
-          _aiModelService.errorMessage ?? 'Unknown error',
-          _getGemmaFixInstructions(_aiModelService.errorMessage),
+          _localizations.gemmaInitError(error),
+          _getGemmaFixInstructions(error),
         );
         return false;
       }
     } catch (e) {
+      final errorMessage = e.toString();
       _updateServiceError(
         index,
-        'Gemma initialization error: $e',
-        _getGemmaFixInstructions(e.toString()),
+        _localizations.gemmaInitError(errorMessage),
+        _getGemmaFixInstructions(errorMessage),
       );
       return false;
     }
   }
 
   String _getGemmaFixInstructions(String? error) {
-    if (error == null) return 'Try restarting the app.';
+    if (error == null) return _localizations.gemmaFixRestart;
 
-    if (error.contains('Network') || error.contains('connection')) {
-      return 'Check your internet connection and try again. The AI model needs to be downloaded on first use.';
-    } else if (error.contains('corrupted') || error.contains('validation')) {
-      return 'The model file is corrupted. Tap "Retry" to clear and re-download the model.';
-    } else if (error.contains('storage') || error.contains('space')) {
-      return 'Free up storage space on your device. The AI model requires about 2GB of space.';
+    final lowerError = error.toLowerCase();
+    if (lowerError.contains('network') || lowerError.contains('connection')) {
+      return _localizations.gemmaFixNetwork;
+    } else if (lowerError.contains('corrupted') ||
+        lowerError.contains('validation')) {
+      return _localizations.gemmaFixCorrupted;
+    } else if (lowerError.contains('storage') || lowerError.contains('space')) {
+      return _localizations.gemmaFixStorage;
     } else {
-      return 'Try restarting the app. If the problem persists, clear app data and try again.';
+      return _localizations.gemmaFixRestart;
     }
   }
 

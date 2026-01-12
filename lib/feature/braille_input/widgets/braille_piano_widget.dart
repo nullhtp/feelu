@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/extensions/context_extensions.dart';
 import 'braille_piano_key.dart';
 
 class BraillePianoWidget extends StatefulWidget {
@@ -46,6 +47,8 @@ class _BraillePianoWidgetState extends State<BraillePianoWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final semanticHint = l10n.brailleKeySemanticHint;
     return Container(
       padding: const EdgeInsets.all(2),
       child: Column(
@@ -59,7 +62,10 @@ class _BraillePianoWidgetState extends State<BraillePianoWidget> {
                   child: Container(
                     margin: const EdgeInsets.all(4),
                     child: BraillePianoKey(
-                      label: 'DOT 1',
+                        label: l10n.brailleDot1Label,
+                        semanticLabel:
+                            l10n.brailleKeySemanticLabel(l10n.brailleDot1Label),
+                        semanticHint: semanticHint,
                       onPressed: () => _handleKeyPress(0),
                       isPressed: _currentKeysPressed[0],
                       pressedColor: Colors.blue.shade600,
@@ -73,7 +79,10 @@ class _BraillePianoWidgetState extends State<BraillePianoWidget> {
                   child: Container(
                     margin: const EdgeInsets.all(4),
                     child: BraillePianoKey(
-                      label: 'DOT 2',
+                        label: l10n.brailleDot2Label,
+                        semanticLabel:
+                            l10n.brailleKeySemanticLabel(l10n.brailleDot2Label),
+                        semanticHint: semanticHint,
                       onPressed: () => _handleKeyPress(1),
                       isPressed: _currentKeysPressed[1],
                       pressedColor: Colors.green.shade600,
@@ -87,7 +96,10 @@ class _BraillePianoWidgetState extends State<BraillePianoWidget> {
                   child: Container(
                     margin: const EdgeInsets.all(4),
                     child: BraillePianoKey(
-                      label: 'DOT 3',
+                        label: l10n.brailleDot3Label,
+                        semanticLabel:
+                            l10n.brailleKeySemanticLabel(l10n.brailleDot3Label),
+                        semanticHint: semanticHint,
                       onPressed: () => _handleKeyPress(2),
                       isPressed: _currentKeysPressed[2],
                       pressedColor: Colors.orange.shade600,
@@ -102,7 +114,10 @@ class _BraillePianoWidgetState extends State<BraillePianoWidget> {
                   child: Container(
                     margin: const EdgeInsets.all(4),
                     child: BraillePianoKey(
-                      label: 'SPACE',
+                        label: l10n.brailleSpaceLabel,
+                        semanticLabel:
+                            l10n.brailleKeySemanticLabel(l10n.brailleSpaceLabel),
+                        semanticHint: semanticHint,
                       onPressed: _handleSpaceKey,
                       isSpaceKey: false,
                       pressedColor: Colors.purple.shade600,

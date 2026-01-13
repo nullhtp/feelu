@@ -5,11 +5,18 @@ import '../core/services/services.dart';
 /// Text-to-Speech service for offline speech synthesis
 class TtsOutputService implements Outputable {
   final ITtsService _ttsService = ServiceLocator.get<ITtsService>();
+  bool _isInitialized = false;
 
   /// Initialize the TTS service
   @override
-  Future<bool> initialize() async {
-    return true;
+  Future<void> initialize() async {
+    if (_isInitialized) return;
+
+    final initialized = await _ttsService.initialize();
+    if (!initialized) {
+      throw Exception('Failed to initialize Text-to-Speech service');
+    }
+    _isInitialized = true;
   }
 
   /// Implementation of Outputable interface - processes text for speech output
@@ -22,5 +29,6 @@ class TtsOutputService implements Outputable {
   @override
   Future<void> dispose() async {
     await _ttsService.stop();
+    _isInitialized = false;
   }
 }

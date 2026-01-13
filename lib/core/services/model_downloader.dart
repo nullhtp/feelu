@@ -204,59 +204,77 @@ class ModelDownloader implements IModelDownloader {
         Exception('Download failed after $maxRetries attempts');
   }
 
-  /// Internal method to attempt a single download
-  Future<void> _attemptDownload(Function(double) onProgress) async {
-    http.StreamedResponse? response;
-    IOSink? fileSink;
+    /// Internal method to attempt a single download
+    Future<void> _attemptDownload(Function(double) onProgress) async {
+      http.StreamedResponse? response;
+      IOSink? fileSink;
 
-    try {
-      final filePath = await getFilePath();
-      final file = File(filePath);
+      try {
+        final filePath = await getFilePath();
+        final file = File(filePath);
 
-      int downloadedBytes = 0;
-      if (file.existsSync()) {
-        downloadedBytes = await file.length();
-      }
+        int downloadedBytes = 0;
+        if (file.existsSync()) {
+          downloadedBytes = await file.length();
+        }
 
-      final request = http.Request('GET', Uri.parse(model.url));
+        final request = http.Request('GET', Uri.parse(model.url));
 
-      final accessToken = await _config.getAccessToken();
-      if (accessToken != null && accessToken.isNotEmpty) {
-        request.headers['Authorization'] = 'Bearer $accessToken';
-      }
+        final accessToken = await _config.getAccessToken();
+        if (accessToken != null && accessToken.isNotEmpty) {
+          request.headers['Authorization'] = 'Bearer $accessToken';
+        }
 
-      if (downloadedBytes > 0) {
-        request.headers['Range'] = 'bytes=$downloadedBytes-';
-      }
+        if (downloadedBytes > 0) {
+          request.headers['Range'] = 'bytes=$downloadedBytes-';
+        }
 
-      response = await request.send();
-      if (response.statusCode == 200 || response.statusCode == 206) {
-        final contentLength = response.contentLength ?? 0;
-        final totalBytes = downloadedBytes + contentLength;
+        response = await request.send();
+        final resumeRequested = downloadedBytes > 0;
 
-        // Ensure we have enough space and the total size makes sense
-        if (totalBytes < _minimumModelSize) {
+        if (response.statusCode == 200 && resumeRequested) {
+          // Server ignored our Range request; start a clean download to avoid corrupt files
+          await file.writeAsBytes(const [], mode: FileMode.write, flush: true);
+          downloadedBytes = 0;
+        }
+
+        if (response.statusCode == 200 || response.statusCode == 206) {
+          final contentLength = response.contentLength;
+          final int? totalBytes =
+              contentLength != null ? downloadedBytes + contentLength : null;
+
+          // Ensure we have enough space and the total size makes sense when known
+          if (totalBytes != null && totalBytes < _minimumModelSize) {
+            throw Exception(
+              'Model size too small: $totalBytes bytes (minimum: $_minimumModelSize)',
+            );
+          }
+
+          fileSink = file.openWrite(mode: FileMode.append);
+
+          int received = downloadedBytes;
+
+          await for (final chunk in response.stream) {
+            fileSink.add(chunk);
+            received += chunk.length;
+
+            final progress = totalBytes != null && totalBytes > 0
+                ? received / totalBytes
+                : (received / _minimumModelSize).clamp(0.0, 0.99);
+            onProgress(progress);
+          }
+
+          if (totalBytes == null) {
+            // Signal completion when we could not compute determinate progress
+            onProgress(1.0);
+          }
+        } else {
           throw Exception(
-            'Model size too small: $totalBytes bytes (minimum: $_minimumModelSize)',
+            'Failed to download the model. Status: ${response.statusCode}',
           );
         }
-
-        fileSink = file.openWrite(mode: FileMode.append);
-
-        int received = downloadedBytes;
-
-        await for (final chunk in response.stream) {
-          fileSink.add(chunk);
-          received += chunk.length;
-          onProgress(totalBytes > 0 ? received / totalBytes : 0.0);
-        }
-      } else {
-        throw Exception(
-          'Failed to download the model. Status: ${response.statusCode}',
-        );
+      } finally {
+        if (fileSink != null) await fileSink.close();
       }
-    } finally {
-      if (fileSink != null) await fileSink.close();
     }
-  }
 }
